@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="confirmation_mail_send_form" model="ir.ui.view">
+            <field name="name">confirmation.mail.send.form</field>
+            <field name="model">confirmation.mail.send</field>
+            <field name="arch" type="xml">
+                <form>
+                    <!-- Invisible fields -->
+                    <field name="company_id" invisible="1"/>
+                    <field name="folder_id" invisible="1"/>
+
+                    <!-- Mail -->
+                    <div>
+                        <group>
+                            <label for="mail_partner_ids" string="المرسل اليه"/>
+                            <div>
+                                <span>يمكنكم اضافة البريد الالكتروني</span>
+                                <field name="mail_partner_ids"
+                                       widget="many2many_tags_email"
+                                       placeholder="Add contacts to notify..."
+                                       context="{'force_email': True, 'show_email': True}"/>
+                            </div>
+                            <field name="mail_subject"
+                                   placeholder="Subject..."
+                                   required="mail_subject == False"/>
+                        </group>
+                        <field name="mail_body"
+                               class="oe-bordered-editor"
+                               options="{'style-inline': true}"/>
+                        <group>
+                            <group>
+                                <field name="mail_template_id"
+                                       options="{'no_create': True, 'no_edit': True}"
+                                       context="{'default_model': 'montage.demande.credit'}"/>
+                            </group>
+                        </group>
+                    </div>
+
+                    <footer>
+                        <button string="تأكيد"
+                                data-hotkey="q"
+                                name="action_send_and_print"
+                                type="object"
+                                class="print btn-primary o_mail_send">
+                        </button>
+                        <button string="إلغاء"
+                                data-hotkey="x"
+                                special="cancel"
+                                class="btn-secondary"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <record id="email_template_ponctuel" model="mail.template">
+            <field name="name">Dossier</field>
+            <field name="model_id" ref="dept_comm.model_wk_workflow_ponctuel"/>
+            <field name="email_from">{{ (
+                user.email_formatted) }}
+            </field>
+            <field name="partner_to">{{ object._get_partner() }}</field>
+            <field name="subject">تاكيد الملف {{ object.name }} {{ object.nom_client.name or 'n/a' }}
+            </field>
+            <field name="description">Dossier</field>
+            <field name="body_html" type="html">
+                <div style="margin: 0px; padding: 0px;">
+                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                        السلام عليكم،
+                        <br/>
+                        نود أن نخبركم أن حالة الملف قد تم تحديثها بنجاح.
+                        <br/>
+                        <br/>
+                        اسم المتعامل:
+                        <t t-out="object.nom_client.name"/>
+                        <br/>
+                        الفرع:
+                        <t t-out="object.branche.ref"/>
+                        <br/>
+                        يُمكنكم الاطلاع على التحديث الأخير عبر الرابط
+                        أدناه:
+                        <a t-att-href="'/web#id=' + str(object.id) + '&amp;view_type=form&amp;model=wk.workflow.ponctuel'">
+                            <t t-out="object.name"/>
+                        </a>
+                        <br/>
+                        نشكر لكم تفهمكم وتعاونكم.
+                        <br/>
+                        أطيب التحيات،
+                        <t t-if="user.signature">
+                            <br/>
+                            <t t-out="user.signature or ''">--<br/>Mitchell Admin
+                            </t>
+                        </t>
+                    </p>
+                </div>
+            </field>
+            <field name="lang">{{ object.partner_id.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+        <record model="ir.ui.view" id="confirmation_etape_wizard_form">
+            <field name="name">etape.wizard.form</field>
+            <field name="model">etape.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    لتنفيذ العملية, عليك الضغط على تأكيد
+                    <footer>
+                        <button name="confirm" type="object" string="تأكيد" class="btn-primary"/>
+                        <button name="cancel" type="object" string="إلغاء" class="btn-secondary"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+    <record id="seq_demande_ponctuel" model="ir.sequence">
+            <field name="name">Demande</field>
+            <field name="code">wk.credit.ponctuel</field>
+            <field name="active">TRUE</field>
+            <field name="prefix">DCP/%(range_year)s/</field>
+            <field name="padding">3</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="use_date_range" eval="True" />
+        </record>
+    <record id="wk_tracking_action" model="ir.actions.act_window">
+        <field name="name">Tracking</field>
+        <field name="res_model">wk.tracking.ponctuel</field>
+        <field name="view_mode">tree</field>
+    </record>
+    <record id="view_wk_tracking_tree" model="ir.ui.view">
+        <field name="name">wk.tracking.ponctuel.tree</field>
+        <field name="model">wk.tracking.ponctuel</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="date_debut"/>
+                <field name="date_fin"/>
+                <field name="date_difference" decoration-danger="depasse == True" decoration-success="depasse == False"/>
+                <field name="time" />
+                <field name="state"/>
+                <field name="is_revision" column_invisible="1"/>
+                <field name="depasse" column_invisible="1"/>
+                <field name="comment" decoration-danger="is_revision == True" decoration-success="is_revision == False"/>
+            </tree>
+        </field>
+    </record>
+    <record model="ir.ui.view" id="retour_ponctuel_form">
+            <field name="name">retour_ponctuel_form</field>
+            <field name="model">wk.ponctuel.retour</field>
+            <field name="arch" type="xml">
+                <form>
+                    <p>سبب طلب المراجعة</p>
+                    <field name="raison"/>
+                    <br/>
+                    <footer>
+                        <button name="send" type="object" string="تاكيد" class="btn-primary"/>
+                        <button name="cancel" type="object" string="الغاء" class="btn-secondary"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+</odoo>

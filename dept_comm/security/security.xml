@@ -1,0 +1,137 @@
+<?xml version="1.0" ?>
+<odoo>
+    <record id="module_dept_comm_category" model="ir.module.category">
+        <field name="name">Dept Workflow</field>
+    </record>
+    <record id="module_dept_comm_agence_category" model="ir.module.category">
+        <field name="name">الفرع</field>
+        <field name="parent_id" ref="module_dept_comm_category"/>
+    </record>
+    <record id="module_dept_comm_finance_category" model="ir.module.category">
+        <field name="name">الاتمان</field>
+        <field name="parent_id" ref="module_dept_comm_category"/>
+    </record>
+
+    <record id="module_dept_comm_risk_category" model="ir.module.category">
+        <field name="name">ادارة المخاطر</field>
+        <field name="parent_id" ref="module_dept_comm_category"/>
+    </record>
+
+    <record id="module_dept_comm_commercial_category" model="ir.module.category">
+        <field name="name">ادارة التجارية</field>
+        <field name="parent_id" ref="module_dept_comm_category"/>
+    </record>
+    <record id="module_dept_comm_commite_category" model="ir.module.category">
+        <field name="name">Comite</field>
+        <field name="parent_id" ref="module_dept_comm_category"/>
+    </record>
+    <record id="module_dept_comm_dga_category" model="ir.module.category">
+        <field name="name">DGA</field>
+        <field name="parent_id" ref="module_dept_comm_category"/>
+    </record>
+    <record id="module_dept_comm_dg_category" model="ir.module.category">
+        <field name="name">DG</field>
+        <field name="parent_id" ref="module_dept_comm_category"/>
+    </record>
+    <record id="module_dept_comm_administration_category" model="ir.module.category">
+        <field name="name">Administration</field>
+        <field name="parent_id" ref="module_dept_comm_category"/>
+    </record>
+	<record id="dept_comm_group_all_users" model="res.groups">
+        <field name="name">All</field>
+        <field name="category_id"
+               ref="module_dept_comm_administration_category"/>
+        <field name="implied_ids"
+               eval="[(4, ref('base.group_user'))]"/>
+    </record>
+    <record id="dept_comm_group_agent_agence" model="res.groups">
+        <field name="name">Employée</field>
+        <field name="category_id"
+               ref="module_dept_comm_agence_category"/>
+        <field name="implied_ids"
+               eval="[(4, ref('base.group_user'))]"/>
+    </record>
+    <record id="dept_comm_group_responsable_agence" model="res.groups">
+        <field name="name">Responsable</field>
+        <field name="category_id"
+               ref="module_dept_comm_agence_category"/>
+        <field name="implied_ids"
+               eval="[(4, ref('dept_comm.dept_comm_group_agent_agence'))]"/>
+    </record>
+
+<record id="dept_comm_group_analyste" model="res.groups">
+        <field name="name">Analyste</field>
+        <field name="category_id"
+               ref="module_dept_comm_finance_category"/>
+        <field name="implied_ids"
+               eval="[(4, ref('dept_comm_group_all_users'))]"/>
+    </record>
+    <record id="dept_comm_group_responsable_analyste" model="res.groups">
+        <field name="name">Responsable Analyste</field>
+        <field name="category_id"
+               ref="module_dept_comm_finance_category"/>
+        <field name="implied_ids"
+               eval="[(4, ref('dept_comm.dept_comm_group_analyste'))]"/>
+    </record>
+
+    <record id="dept_comm_group_responsable_credit" model="res.groups">
+        <field name="name">Analyste Risque</field>
+        <field name="category_id"
+               ref="module_dept_comm_risk_category"/>
+        <field name="implied_ids"
+               eval="[(4, ref('dept_comm_group_all_users'))]"/>
+    </record>
+    <record id="dept_comm_group_responsable_risque" model="res.groups">
+        <field name="name">Responsable Risque</field>
+        <field name="category_id"
+               ref="module_dept_comm_risk_category"/>
+        <field name="implied_ids"
+               eval="[(4, ref('dept_comm_group_responsable_credit'))]"/>
+    </record>
+    <record id="dept_comm_group_charge_commercial" model="res.groups">
+        <field name="name">Chargé Commercial</field>
+        <field name="category_id"
+               ref="module_dept_comm_commercial_category"/>
+        <field name="implied_ids"
+               eval="[(4, ref('dept_comm_group_all_users'))]"/>
+    </record>
+    <record id="dept_comm_group_responsable_commercial" model="res.groups">
+        <field name="name">Responsable Commercial</field>
+        <field name="category_id"
+               ref="module_dept_comm_commercial_category"/>
+        <field name="implied_ids"
+               eval="[(4, ref('dept_comm_group_charge_commercial'))]"/>
+    </record>
+    <record id="dept_comm_group_comite" model="res.groups">
+        <field name="name">Comite</field>
+        <field name="category_id"
+               ref="module_dept_comm_commite_category"/>
+        <field name="implied_ids"
+               eval="[(4, ref('dept_comm_group_all_users'))]"/>
+    </record>
+
+    <record id="dept_comm_group_dga" model="res.groups">
+        <field name="name">DGA</field>
+        <field name="category_id"
+               ref="module_dept_comm_dga_category"/>
+        <field name="implied_ids"
+               eval="[(4, ref('dept_comm_group_all_users'))]"/>
+    </record>
+    <record id="dept_comm_group_dg" model="res.groups">
+        <field name="name">DG</field>
+        <field name="category_id"
+               ref="module_dept_comm_dg_category"/>
+        <field name="implied_ids"
+               eval="[(4, ref('dept_comm_group_all_users'))]"/>
+    </record>
+
+    <record id="dept_comm_group_administration" model="res.groups">
+        <field name="name">Administration</field>
+        <field name="category_id"
+               ref="module_dept_comm_administration_category"/>
+        <field name="implied_ids"
+               eval="[(4, ref('dept_comm.dept_comm_group_all_users')),
+               (4, ref('base.group_user'))]"/>
+    </record>
+    
+</odoo>
