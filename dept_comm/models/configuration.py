@@ -7,13 +7,15 @@ class DocChecker(models.Model):
     _description = ' check documents'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
-    
-    
+    step_id = fields.Many2one('wk.etape.ponctuel')
+
+
 class KycDetail(models.Model):
     _inherit = 'wk.kyc.details'
     _description = 'Line KYC'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class Partenaire(models.Model):
@@ -21,6 +23,7 @@ class Partenaire(models.Model):
     _description = 'Partenaire du client'
     
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class EquipeGestion(models.Model):
@@ -28,6 +31,7 @@ class EquipeGestion(models.Model):
     _description = 'Equipe de gestion'
     
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
     
     
 class Taillefin(models.Model):
@@ -35,6 +39,7 @@ class Taillefin(models.Model):
     _description = 'La taille et la structure du financement requis'
     
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
     
 
 class SituationBancaire(models.Model):
@@ -42,13 +47,14 @@ class SituationBancaire(models.Model):
     _description = 'Situation bancaire et obligations envers autrui'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
-    
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 class SituationFinanciere(models.Model):
     _inherit = 'wk.situation.fin'
     _description = 'Situation financière'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
     
 
 class Fournisseur(models.Model):
@@ -56,6 +62,7 @@ class Fournisseur(models.Model):
     _description = 'fournisseur'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
     
 
 class Client(models.Model):
@@ -63,6 +70,7 @@ class Client(models.Model):
     _description = 'clients'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class Companies(models.Model):
@@ -70,6 +78,7 @@ class Companies(models.Model):
     _description = 'Companies in relation'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
     
 
 class FaciliteAccorde(models.Model):
@@ -77,6 +86,7 @@ class FaciliteAccorde(models.Model):
     _description = 'Détails des facilités accordées'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
     
 
 class Detail(models.Model):
@@ -84,6 +94,7 @@ class Detail(models.Model):
     _description = 'Detail Garantie'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
     
 
 class DetailGarantiePropose(models.Model):
@@ -91,24 +102,28 @@ class DetailGarantiePropose(models.Model):
     _description = 'Detail Garantie'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
     
 
 class Ganrantie(models.Model):
     _inherit = 'wk.garantie.conf'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
     
     
 class GanrantieFin(models.Model):
     _inherit = 'wk.garantie.fin'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
     
 
 class GanrantieAutre(models.Model):
     _inherit = 'wk.garantie.autres'
     
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
     
 
 class Risque(models.Model):
@@ -116,6 +131,7 @@ class Risque(models.Model):
     _description = 'Risque'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class PositionTax(models.Model):
@@ -123,6 +139,7 @@ class PositionTax(models.Model):
     _description = 'Position taxonomique'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class MouvementAction(models.Model):
@@ -130,6 +147,7 @@ class MouvementAction(models.Model):
     _description = 'Mouvement et Action'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class DeclarationFisc(models.Model):
@@ -137,6 +155,7 @@ class DeclarationFisc(models.Model):
     _description = 'Companies fisc'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class FaciliteExistante(models.Model):
@@ -144,6 +163,7 @@ class FaciliteExistante(models.Model):
     _description = 'Facilités existantes avec la banque'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class MouvementGroupe(models.Model):
@@ -151,24 +171,28 @@ class MouvementGroupe(models.Model):
     _description = 'Mouvement et Action'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class TCR(models.Model):
     _inherit = 'import.ocr.tcr'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class Passif(models.Model):
     _inherit = 'import.ocr.passif'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class Actif(models.Model):
     _inherit = 'import.ocr.actif'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class BilanFisc(models.Model):
@@ -177,6 +201,7 @@ class BilanFisc(models.Model):
     _order = 'sequence,id'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class Recap(models.Model):
@@ -184,6 +209,7 @@ class Recap(models.Model):
     _description = 'declaration'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class Variables(models.Model):
@@ -191,6 +217,7 @@ class Variables(models.Model):
     _description = 'variables'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class SwotWeakness(models.Model):
@@ -198,6 +225,7 @@ class SwotWeakness(models.Model):
     _description = 'swot matrice'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class SwotStrength(models.Model):
@@ -205,6 +233,7 @@ class SwotStrength(models.Model):
     _description = 'swot matrice'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class SwotThreats(models.Model):
@@ -212,6 +241,7 @@ class SwotThreats(models.Model):
     _description = 'swot matrice'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class SwotOpportunities(models.Model):
@@ -219,6 +249,7 @@ class SwotOpportunities(models.Model):
     _description = 'swot matrice'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class FacilitePropose(models.Model):
@@ -226,6 +257,7 @@ class FacilitePropose(models.Model):
     _description = 'facilite propose'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class Scoring(models.Model):
@@ -233,6 +265,7 @@ class Scoring(models.Model):
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel',
                                   string='Ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
 
 
 class Tracking(models.Model):
@@ -240,6 +273,7 @@ class Tracking(models.Model):
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel',
                                   string='Ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
     date_debut = fields.Date(string='تاريخ البدء')
     date_fin = fields.Date(string='تاريخ الانتهاء')
     date_difference = fields.Char(string='الوقت المستغرق', compute='_compute_date')
@@ -282,3 +316,10 @@ class Tracking(models.Model):
                 rec.time_id = time_id.id
             else:
                 rec.time_id = False
+
+
+class States(models.Model):
+    _name = 'wk.state.ponctuel'
+
+    name = fields.Char(string='Nom')
+    sequence = fields.Integer(string='Nom')

@@ -10,6 +10,7 @@
             'security/security.xml',
             'security/ir.model.access.csv',
             'reports/mail_template.xml',
+            'data/state_data.xml',
             'reports/report.xml',
             'views/workflow_new.xml',
             'views/wizard.xml'],

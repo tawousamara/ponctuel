@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="principe_1" model="wk.state.ponctuel">
+            <field name="name">الفرع</field>
+            <field name="sequence">1</field>
+        </record>
+        <record id="principe_2" model="wk.state.ponctuel">
+            <field name="name">مديرية الاعمال التجارية</field>
+            <field name="sequence">2</field>
+        </record>
+    </data>
+</odoo>
