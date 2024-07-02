@@ -200,8 +200,8 @@ class Ponctuel(models.Model):
     active = fields.Boolean(default=True)
     workflow_old = fields.Many2one('wk.workflow.dashboard', string='ملف سابق',)
     explanation = fields.Text(string='الغرض من الطلب')
-    #lanced = fields.Boolean(string='Traitement lancé', compute='compute_visible_states')
-
+    lanced = fields.Boolean(string='Traitement lancé', compute='compute_visible_states')
+    plan_ids = fields.One2many('wk.ponctuel.charge', 'ponctuel_id')
     nom_client = fields.Many2one('res.partner', string='اسم المتعامل',
                                  domain=lambda self: [('branche', '=', self.env.user.partner_id.branche.id),
                                                       ('is_client', '=', True)], )
@@ -247,6 +247,7 @@ class Ponctuel(models.Model):
     result_visit = fields.Text(string='نتائج الزيارة')
     #images = fields.One2many('wk.documents', 'ponctuel_id', string='الصور المرفقة')
     forme_jur = fields.Many2one('wk.forme.jur', string='الشكل القانوني', related='nom_client.forme_jur')
+    states = fields.One2many('wk.etape.ponctuel', 'workflow', string='المديريات')
 
     documents = fields.One2many('wk.document.check', 'ponctuel_id', string='التاكد من الوثائق المرفقة')
 
@@ -309,6 +310,16 @@ class Ponctuel(models.Model):
     passif_id = fields.Many2one('import.ocr.passif', string='Passif')
     actif_id = fields.Many2one('import.ocr.actif', string='Actif')
     bilan_id = fields.One2many('wk.bilan', 'ponctuel_id')
+    bilan1_id = fields.One2many('wk.bilan.cat1', 'ponctuel_id')
+    comment_cat1 = fields.Text(string='تعليق')
+    bilan2_id = fields.One2many('wk.bilan.cat2', 'ponctuel_id')
+    comment_cat2 = fields.Text(string='تعليق')
+    bilan3_id = fields.One2many('wk.bilan.cat3', 'ponctuel_id')
+    comment_cat3 = fields.Text(string='تعليق')
+    bilan4_id = fields.One2many('wk.bilan.cat4', 'ponctuel_id')
+    comment_cat4 = fields.Text(string='تعليق')
+    bilan5_id = fields.One2many('wk.bilan.cat5', 'ponctuel_id')
+    comment_cat5 = fields.Text(string='تعليق')
     comment_bilan = fields.Text(string='تعليق')
     analyse_secteur_act = fields.Text(string='تحليل قطاع عمل العميل')
     analyse_concurrence = fields.Text(string='تحليل المنافسة')
@@ -340,6 +351,12 @@ class Ponctuel(models.Model):
     recommendation_8 = fields.Text(string='توصية نائب المدير العام')
     recommendation_9 = fields.Text(string='قرار لجنة التسهيلات')
 
+    def compute_visible_states(self):
+        for rec in self:
+            if rec.states:
+                rec.lanced = True
+            else:
+                rec.lanced = False
     def relance(self):
         for rec in self:
             #view_id = self.env.ref('dept_comm.confirmation_mail_send_form').id
@@ -594,9 +611,12 @@ class Ponctuel(models.Model):
             states = rec.workflow_old.states.filtered(lambda l: l.sequence in [1, 2])
             for etape in states:
                 vals = get_values(rec, etape)
-                #etape_new = self.env['wk.etape'].create(vals)
+                vals['workflow'] = rec.id
+                etape_new = self.env['wk.etape.ponctuel'].create(vals)
+                vals.pop('etape')
+                vals.pop('workflow')
                 rec.write(vals)
-                get_lists(self, rec, etape)
+                get_lists(self, rec, etape_new, etape)
 
     def open_tracking(self):
         self.ensure_one()
@@ -617,6 +637,15 @@ class Ponctuel(models.Model):
         for rec in self:
             print('hiio')
 
+    def get_data(self):
+        for rec in self:
+            if not rec.states:
+                rec.env['wk.etape.ponctuel'].create({
+                    'workflow': rec.id,
+                    'etape': self.env.ref('dept_comm.principe_1').id,
+                    'nom_client': rec.nom_client
+                })
+
     def _get_partner(self):
         for rec in self:
             group = self.env.ref('dept_comm.dept_comm_group_responsable_commercial')
@@ -625,21 +654,21 @@ class Ponctuel(models.Model):
 
     def validate_information(self):
         for rec in self:
-                #view_id = self.env.ref('dept_comm.confirmation_mail_send_form').id
-                template = self.env.ref('dept_comm.email_template_ponctuel')
-                return {
-                    'name': _("تاكيد"),
-                    'type': 'ir.actions.act_window',
-                    'view_type': 'form',
-                    'view_mode': 'form',
-                    'res_model': 'confirmation.mail.send',
-                    'target': 'new',
-                    'context': {
-                        'relance': False,
-                        'default_folder_id': rec.id,
-                        'default_mail_template_id': template.id,
-                    },
-                }
+            #view_id = self.env.ref('dept_comm.confirmation_mail_send_form').id
+            template = self.env.ref('dept_comm.email_template_ponctuel')
+            return {
+                'name': _("تاكيد"),
+                'type': 'ir.actions.act_window',
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_model': 'confirmation.mail.send',
+                'target': 'new',
+                'context': {
+                    'relance': False,
+                    'default_folder_id': rec.id,
+                    'default_mail_template_id': template.id,
+                },
+            }
 
     def validate_information_function(self):
         for rec in self:
@@ -648,7 +677,7 @@ class Ponctuel(models.Model):
             rec.state = str(actuel_state)
             rec.raison_refus = False
             last_track = self.env['wk.tracking.ponctuel'].search([('ponctuel_id', '=', rec.id),
-                                                                  ('state', '=',last_state)])
+                                                                  ('state', '=', last_state)])
             if last_track:
                 last_track.date_fin = fields.Date.today()
             self.env['wk.tracking.ponctuel'].create({'ponctuel_id': rec.id,
@@ -677,6 +706,7 @@ class Ponctuel(models.Model):
 def get_values(workflow, etape):
     if etape.sequence == 1:
         return {
+            'etape': etape.env.ref('dept_comm.principe_1').id,
             'nom_client': etape.nom_client.id,
             'branche': etape.branche.id,
             'num_compte': etape.num_compte,
@@ -693,6 +723,7 @@ def get_values(workflow, etape):
         }
     elif etape.sequence == 2:
         return {
+            'etape': etape.env.ref('dept_comm.principe_2').id,
             'taux_change': etape.taux_change,
             'annee_fiscal': etape.annee_fiscal,
             'risque_date': etape.risque_date,
@@ -712,7 +743,7 @@ def get_values(workflow, etape):
         }
 
 
-def get_lists(self, etape_new, etape_old):
+def get_lists(self, etape_new,step , etape_old):
     if etape_old.sequence == 1:
         etape_new.kyc.unlink()
         etape_new.apropos.unlink()
@@ -726,14 +757,17 @@ def get_lists(self, etape_new, etape_old):
             self.env['wk.kyc.details'].create({'info': kyc.info,
                                                'answer': kyc.answer,
                                                'detail': kyc.detail,
-                                               'ponctuel_id': etape_new.id})
+                                               'ponctuel_id': etape_new.id,
+                                               'step_id': step.id,
+                                               })
         for a in etape_old.apropos:
             self.env['wk.partenaire'].create({'nom_partenaire': a.nom_partenaire,
                                               'age': a.age,
                                               'pourcentage': a.pourcentage,
                                               'statut_partenaire': a.statut_partenaire,
                                               'nationalite': a.nationalite.id,
-                                              'ponctuel_id': etape_new.id
+                                              'ponctuel_id': etape_new.id,
+                                              'step_id': step.id,
                                               })
         for g in etape_old.gestion:
             self.env['wk.gestion'].create({
@@ -742,7 +776,8 @@ def get_lists(self, etape_new, etape_old):
                 'niveau_etude': g.niveau_etude,
                 'age': g.age,
                 'experience': g.experience,
-                'ponctuel_id': etape_new.id
+                'ponctuel_id': etape_new.id,
+                'step_id': step.id,
             })
         """for empl in etape_old.employees:
             self.env['wk.nombre.employee'].create({
@@ -764,7 +799,8 @@ def get_lists(self, etape_new, etape_old):
                 'type_fin': sit.type_fin.id,
                 'montant': sit.montant,
                 'garanties': sit.garanties,
-                'ponctuel_id': etape_new.id
+                'ponctuel_id': etape_new.id,
+                'step_id': step.id,
             })
         for sit in etape_old.situations_fin:
             self.env['wk.situation.fin'].create({
@@ -773,21 +809,24 @@ def get_lists(self, etape_new, etape_old):
                 'year1': sit.year1,
                 'year2': sit.year2,
                 'year3': sit.year3,
-                'ponctuel_id': etape_new.id
+                'ponctuel_id': etape_new.id,
+                'step_id': step.id,
             })
         for client in etape_old.client:
             self.env['wk.client'].create({
                 'name': client.name,
                 'country': client.country.id,
                 'type_payment': client.type_payment.ids,
-                'ponctuel_id': etape_new.id
+                'ponctuel_id': etape_new.id,
+                'step_id': step.id,
             })
         for f in etape_old.fournisseur:
             self.env['wk.fournisseur'].create({
                 'name': f.name,
                 'country': f.country.id,
                 'type_payment': f.type_payment.ids,
-                'ponctuel_id': etape_new.id
+                'ponctuel_id': etape_new.id,
+                'step_id': step.id,
             })
     elif etape_old.sequence == 2:
         etape_new.detail_garantie_actuel_ids.unlink()
@@ -798,6 +837,12 @@ def get_lists(self, etape_new, etape_old):
         etape_new.risque_central.unlink()
         etape_new.position_tax.unlink()
         etape_new.companies.unlink()
+        etape_new.bilan_id.unlink()
+        etape_new.bilan1_id.unlink()
+        etape_new.bilan2_id.unlink()
+        etape_new.bilan3_id.unlink()
+        etape_new.bilan4_id.unlink()
+        etape_new.bilan5_id.unlink()
         #etape_new.companies_fisc.unlink()
         etape_new.mouvement_group.unlink()
         etape_new.recap_ids.unlink()
@@ -815,7 +860,8 @@ def get_lists(self, etape_new, etape_old):
                   'date': doc.date,
                   'recouvrement': doc.recouvrement,
                   'niveau': doc.niveau,
-                  'ponctuel_id': etape_new.id})
+                  'ponctuel_id': etape_new.id,
+                  'step_id': step.id,})
         for doc in etape_old.detail_garantie_propose_ids:
             self.env['wk.detail.garantie.propose'].create({'type_garantie': doc.type_garantie.id,
                   'type_contrat': doc.type_contrat.id,
@@ -823,35 +869,39 @@ def get_lists(self, etape_new, etape_old):
                   'date': doc.date,
                   'recouvrement': doc.recouvrement,
                   'niveau': doc.niveau,
-                  'ponctuel_id': etape_new.id})
+                  'ponctuel_id': etape_new.id,
+                  'step_id': step.id,})
         for doc in etape_old.garantie_conf:
             self.env['wk.garantie.conf'].create({'info': doc.info,
                   'answer': doc.answer,
                   'detail': doc.detail,
-                  'ponctuel_id': etape_new.id})
+                  'ponctuel_id': etape_new.id,
+                                                 'step_id': step.id,})
         for doc in etape_old.garantie_fin:
             self.env['wk.garantie.fin'].create({'info': doc.info,
                   'answer': doc.answer,
                   'detail': doc.detail,
-                  'ponctuel_id': etape_new.id})
+                  'ponctuel_id': etape_new.id,'step_id': step.id,})
         for doc in etape_old.garantie_autres:
             self.env['wk.garantie.autres'].create({'info': doc.info,
                   'answer': doc.answer,
                   'detail': doc.detail,
-                  'ponctuel_id': etape_new.id})
+                  'ponctuel_id': etape_new.id,'step_id': step.id,})
         for doc in etape_old.risque_central:
             self.env['wk.risque.line'].create({'declaration': doc.declaration,
                   'montant_esalam_dz_donne': doc.montant_esalam_dz_donne,
                   'montant_esalam_dz_used': doc.montant_esalam_dz_used,
                   'montant_other_dz_donne': doc.montant_esalam_dz_used,
                   'montant_other_dz_used': doc.montant_esalam_dz_used,
-                  'ponctuel_id': etape_new.id})
+                  'ponctuel_id': etape_new.id,
+                  'step_id': step.id,})
         for doc in etape_old.position_tax:
             self.env['wk.position'].create({'name': doc.name,
                   'adversite': doc.adversite,
                   'non_adversite': doc.non_adversite,
                   'notes': doc.notes,
-                  'ponctuel_id': etape_new.id})
+                  'ponctuel_id': etape_new.id,
+                  'step_id': step.id,})
         for doc in etape_old.companies:
             self.env['wk.companies'].create({'name': doc.name,
                   'date_creation': doc.date_creation,
@@ -859,7 +909,8 @@ def get_lists(self, etape_new, etape_old):
                   'chiffre_affaire': doc.chiffre_affaire,
                   'n1_num_affaire': doc.n1_num_affaire,
                   'n_num_affaire': doc.n_num_affaire,
-                  'ponctuel_id': etape_new.id})
+                  'ponctuel_id': etape_new.id,
+                                             'step_id': step.id,})
         """for doc in etape_old.companies_fisc:
             self.env['wk.companies.fisc'].create({'declaration': doc.declaration,
                   'sequence': doc.sequence,
@@ -877,70 +928,70 @@ def get_lists(self, etape_new, etape_old):
                                                       'n1_dz': doc.n1_dz,
                                                       'n_dz': doc.n_dz,
                                                       'remarques': doc.remarques,
-                                                      'ponctuel_id': etape_new.id})
+                                                      'ponctuel_id': etape_new.id,
+                                                   'step_id': step.id})
         for doc in etape_old.recap_ids:
             self.env['wk.recap'].create({'declaration': doc.declaration,
                   'sequence': doc.sequence,
                   'montant': doc.montant,
-                  'ponctuel_id': etape_new.id})
+                  'ponctuel_id': etape_new.id,
+                  'step_id': step.id})
         for doc in etape_old.var_ids:
             self.env['wk.variable'].create({'var': doc.var,
                   'sequence': doc.sequence,
                   'montant': doc.montant,
-                  'ponctuel_id': etape_new.id})
+                  'ponctuel_id': etape_new.id,'step_id': step.id})
         for doc in etape_old.weakness_ids:
             self.env['wk.swot.weakness'].create({'name': doc.name,
-                  'ponctuel_id': etape_new.id})
+                  'ponctuel_id': etape_new.id,
+                                                 'step_id': step.id})
         for doc in etape_old.strength_ids:
             self.env['wk.swot.strength'].create({'name': doc.name,
-                  'ponctuel_id': etape_new.id})
+                  'ponctuel_id': etape_new.id,'step_id': step.id})
         for doc in etape_old.threat_ids:
             self.env['wk.swot.threat'].create({'name': doc.name,
-                  'ponctuel_id': etape_new.id})
+                  'ponctuel_id': etape_new.id,'step_id': step.id})
         for doc in etape_old.opportunitie_ids:
             self.env['wk.swot.opportunitie'].create({'name': doc.name,
-                                                     'ponctuel_id': etape_new.id})
+                                                     'ponctuel_id': etape_new.id,'step_id': step.id,})
         for doc in etape_old.facilite_propose:
             self.env['wk.facilite.accorde'].create({'type_demande_ids': doc.type_demande_ids.ids,
                                                     'montant_da_demande': doc.montant_dz,
                                                     'garantie_montant': doc.preg,
                                                     'remarques': doc.condition,
-                                                    'ponctuel_id': etape_new.id
+                                                    'ponctuel_id': etape_new.id,'step_id': step.id,
                                                     })
 
-        for doc in etape_new.bilan_id:
-            if doc.sequence != 0:
-                value = etape_old.bilan_id.filtered(lambda l: l.sequence == doc.sequence)
-                doc.write({
-                        'bilan_id': value.id,
-                        'sequence': value.sequence,
-                        'categorie': value.categorie,
-                        'declaration': value.declaration,
-                        'year_1': value.year_1,
-                        'year_2': value.year_2,
-                        'year_3': value.year_3,
-                        'year_4': value.year_4,
-                        'is_null_4': value.is_null_4,
-                        'is_null_3': value.is_null_3,
-                        'is_null_2': value.is_null_2,
-                        'is_null_1': value.is_null_1,
-                        'variante': value.variante,
-                })
-            '''for doc in etape_old.bilan_id:
-                self.env['wk.bilan'].create({
-                    'ponctuel_id': etape_new.id,
-                    'bilan_id': doc.id,
-                    'sequence': doc.sequence,
-                    'categorie': doc.categorie,
-                    'declaration': doc.declaration,
-                    'year_1': doc.year_1,
-                    'year_2': doc.year_2,
-                    'year_3': doc.year_3,
-                    'year_4': doc.year_4,
-                    'is_null_4': doc.is_null_4,
-                    'is_null_3': doc.is_null_3,
-                    'is_null_2': doc.is_null_2,
-                    'is_null_1': doc.is_null_1,
-                    'variante': doc.variante,
-                })'''
-
+        vals = {'ponctuel_id': etape_new.id,
+                'step_id': step.id,
+                'sequence': 0,
+                'declaration': 'السنة',
+                'year_1': etape_new.annee_fiscal - 3,
+                'year_2': etape_new.annee_fiscal - 2,
+                'year_3': etape_new.annee_fiscal - 1,
+                'year_4': etape_new.annee_fiscal,
+                }
+        self.env['wk.bilan.cat1'].create(vals)
+        self.env['wk.bilan.cat2'].create(vals)
+        self.env['wk.bilan.cat3'].create(vals)
+        self.env['wk.bilan.cat4'].create(vals)
+        self.env['wk.bilan.cat5'].create(vals)
+        for doc in etape_old.bilan_id:
+            self.env['wk.bilan'].create({
+                'ponctuel_id': etape_new.id,
+                'step_id': step.id,
+                'bilan_id': doc.id,
+                'sequence': doc.sequence,
+                'categorie': doc.categorie,
+                'declaration': doc.declaration,
+                'year_1': doc.year_1,
+                'year_2': doc.year_2,
+                'year_3': doc.year_3,
+                'year_4': doc.year_4,
+                'is_null_4': doc.is_null_4,
+                'is_null_3': doc.is_null_3,
+                'is_null_2': doc.is_null_2,
+                'is_null_1': doc.is_null_1,
+                'variante': doc.variante,
+            })
+        print(etape_new.bilan_id)

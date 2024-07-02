@@ -54,33 +54,43 @@ list_fisc = [
     'احتياجات راس المال العامل'
 ]
 
-List_Bilan = [
-    'حقوق الملكية',
-    'رأس المال',
-    'نتائج متراكمة',
-    'مجموع المطلوبات',
-    'التزامات بنكية قصيرة الأجل',
-    'التزامات بنكية متوسطة الأجل',
-    'تسهيلات الموردين',
-    'مستحقات ضرائب',
-    'مطلوبات أخرى متداولة',
-    'Leverage',
-    'مجموع الميزانية',
-    'رقم الأعمال',
-    'EBITDA',
-    'صافي الأرباح',
-    'صافي الأرباح/المبيعات',
-    'قدرة التمويل الذاتي CAF',
-    'صافي رأس المال العامل',
-    'احتياجات رأس المال العامل',
-    'نسبة التداول (السيولة)',
-    'نسبة السيولة السريعة',
-    'حقوق عند الزبائن',
-    'المخزون',
-    'متوسط دوران المخزون (يوم)',
-    'متوسط فترة التحصيل (يوم)',
-    'متوسط مدة تسهيلات الموردين (يوم)'
+list_bilan = [
+    ('1', 'حقوق الملكية'),
+    ('1', 'رأس المال'),
+    ('1', 'الاحتياطات'),
+    ('1', 'الارباح المتراكمة (محتجزة+محققة)'),
+    ('1', 'حقوق الملكية / مجموع الميزانية'),
+    ('1', 'ACTIF NET IMMOBILISE CORPOREL'),
+    ('1', 'الات ومعدات و عتاد نقل'),
+    ('1', 'إهتلاكات المعدات'),
+    ('1', 'اهتلاكات / آلات و معدات و عتاد نقل'),
+    ('1', 'صافي رأس المال العامل'),
+    ('1', 'احتياجات رأس المال العامل'),
+    ('1', 'FR/BFR'),
+    ('2', 'مجموع المطلوبات (الديون)'),
+    ('2', 'التزامات بنكية'),
+    ('2', 'تسهيلات الموردين'),
+    ('2', 'ضرائب مستحقة غير مدفوعة'),
+    ('2', 'مطلوبات أخرى متداولة'),
+    ('2', 'نسبة المديونية Leverage'),
+    ('2', 'الالتزامات تجاه البنوك / حقوق'),
+    ('3', 'مجموع الميزانية'),
+    ('3', '(المبيعات، الايرادات)'),
+    ('3', 'EBITDA'),
+    ('3', 'صافي الارباح'),
+    ('3', 'صافي الارباح/المبيعات ROS'),
+    ('3', 'معدل العائد على الموجودات ROA'),
+    ('3', 'معدل العائد على حقوق الملكية ROE'),
+    ('4', 'التدفقات النقدية التشغيلية'),
+    ('4', 'نسبة التداول (السيولة)'),
+    ('4', 'نسبة السيولة السريعة'),
+    ('5', 'حقوق عند الزبائن'),
+    ('5', 'المخزون'),
+    ('5', 'متوسط دوران المخزون (يوم)'),
+    ('5', 'متوسط فترة التحصيل (يوم)'),
+    ('5', 'متوسط مدة تسهيلات الموردين  (يوم)'),
 ]
+
 list_recap = [
     'فترة التحصيل بالأيام',
     'فترة دوران المخزون',
@@ -187,8 +197,12 @@ class Etape(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     workflow = fields.Many2one('wk.workflow.ponctuel', ondelete="cascade")
+    state_etape = fields.Selection([('1', 'قيد الدراسة'),
+                                    ('2', 'انتهاء التحليل')], default='1')
     etape = fields.Many2one('wk.state.ponctuel', string='Etape')
-
+    name = fields.Char(string='Nom', related='etape.name', store=True)
+    sequence = fields.Integer(string='Sequence', related='etape.sequence')
+    state_compute = fields.Float(string='Pourcentage', compute='compute_pourcentage_state')
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company)
     raison_refus = fields.Text(string='سبب طلب المراجعة')
     currency_id = fields.Many2one('res.currency', related='company_id.currency_id')
@@ -198,7 +212,7 @@ class Etape(models.Model):
                                                related='nom_client.chiffre_affaire_creation')
     montant_demande = fields.Float(string='المبلغ المطلوب')
     # lanced = fields.Boolean(string='Traitement lancé', compute='compute_visible_states')
-
+    state = fields.Selection(related='workflow.state', store=True)
     nom_client = fields.Many2one('res.partner', string='اسم المتعامل',
                                  domain=lambda self: [('branche', '=', self.env.user.partner_id.branche.id),
                                                       ('is_client', '=', True)], )
@@ -294,7 +308,7 @@ class Etape(models.Model):
     mouvement = fields.One2many('wk.mouvement', 'step_id',
                                 string='الحركة والأعمال الجانبية للحساب مع مصرف السلام الجزائر (KDA)')
     detail_mouvement = fields.Text(string='التوطين البنكي')
-
+    risk_scoring = fields.Many2one('risk.scoring', string='إدارة المخاطر', related='workflow.risk_scoring')
     companies_fisc = fields.One2many('wk.companies.fisc', 'step_id')
     comment_fisc = fields.Text(string='تعليق')
     visualisation2 = fields.Binary(string='visualisation')
@@ -307,7 +321,20 @@ class Etape(models.Model):
     passif_id = fields.Many2one('import.ocr.passif', string='Passif')
     actif_id = fields.Many2one('import.ocr.actif', string='Actif')
     bilan_id = fields.One2many('wk.bilan', 'step_id')
+    bilan1_id = fields.One2many('wk.bilan.cat1', 'step_id')
+    comment_cat1 = fields.Text(string='تعليق')
+    bilan2_id = fields.One2many('wk.bilan.cat2', 'step_id')
+    comment_cat2 = fields.Text(string='تعليق')
+    bilan3_id = fields.One2many('wk.bilan.cat3', 'step_id')
+    comment_cat3 = fields.Text(string='تعليق')
+    bilan4_id = fields.One2many('wk.bilan.cat4', 'step_id')
+    comment_cat4 = fields.Text(string='تعليق')
+    bilan5_id = fields.One2many('wk.bilan.cat5', 'step_id')
+    comment_cat5 = fields.Text(string='تعليق')
     comment_bilan = fields.Text(string='تعليق')
+    tcr_id = fields.Many2one('import.ocr.tcr', string='TCR')
+    passif_id = fields.Many2one('import.ocr.passif', string='Passif')
+    actif_id = fields.Many2one('import.ocr.actif', string='Actif')
     analyse_secteur_act = fields.Text(string='تحليل قطاع عمل العميل')
     analyse_concurrence = fields.Text(string='تحليل المنافسة')
     ampleur_benefice = fields.Float(string='حجم الارباح PNB المتوقعة')
@@ -326,9 +353,280 @@ class Etape(models.Model):
     garanties_demande_ids = fields.Many2many('wk.garanties', 'garantie_precedente_relat', string='الضمانات')
     exception_ids = fields.Many2many('wk.exception', string='الاستثناءات مع سياسة الائتمان')
     risk_scoring = fields.Many2one('risk.scoring', string='إدارة المخاطر')
+    recommendation_1 = fields.Text(string='توصية مدير إدارة الاعمال التجارية')
 
     annee_fiscal = fields.Integer(string='السنة المالية N', compute='change_annee')
 
+    def compute_pourcentage_state(self):
+        for rec in self:
+            partner = rec.workflow.states.filtered(lambda l: l.sequence == 1).gerant
+            if partner:
+                mail_invite = self.env['mail.wizard.invite'].with_context({
+                    'default_res_model': 'wk.etape.ponctuel',
+                    'default_res_id': rec.id
+                }).with_user(self.env.user).create({
+                    'partner_ids': [(4, partner.id)],
+                    'notify': False})
+                mail_invite.add_followers()
+            if rec.state_etape == '1':
+                rec.state_compute = 0
+            else:
+                rec.state_compute = 1
+
+    def action_create_tcr(self):
+        for rec in self:
+            view_id = self.env.ref('financial_modeling.import_ocr_tcr_view_form').id
+            return {
+                'name': 'TCR',
+                'domain': [('step_id', '=', rec.id)],
+                'res_model': 'import.ocr.tcr',
+                'view_mode': 'form',
+                'view_id': view_id,
+                'type': 'ir.actions.act_window',
+                'context': {'step_id': rec.id}
+            }
+
+    def action_create_actif(self):
+        for rec in self:
+            view_id = self.env.ref('financial_modeling.import_ocr_actif_view_form').id
+            return {
+                'name': 'Actif',
+                'domain': [('step_id', '=', rec.id)],
+                'res_model': 'import.ocr.actif',
+                'view_mode': 'form',
+                'view_id': view_id,
+                'type': 'ir.actions.act_window',
+                'context': {'step_id': rec.id}
+            }
+
+
+    def action_create_passif(self):
+        for rec in self:
+            view_id = self.env.ref('financial_modeling.import_ocr_passif_view_form').id
+            return {
+                'name': 'Passif',
+                'domain': [('step_id', '=', rec.id)],
+                'res_model': 'import.ocr.passif',
+                'view_mode': 'form',
+                'view_id': view_id,
+                'type': 'ir.actions.act_window',
+                'context': {'step_id': rec.id}
+            }
+    def validate_information(self):
+        for rec in self:
+                template = self.env.ref('dept_comm.email_template_ponctuel')
+                return {
+                    'name': _("تاكيد"),
+                    'type': 'ir.actions.act_window',
+                    'view_type': 'form',
+                    'view_mode': 'form',
+                    'res_model': 'confirmation.mail.send',
+                    'target': 'new',
+                    'context': {
+                        'relance': False,
+                        'is_step': True,
+                        'default_folder_id': rec.workflow.id,
+                        'default_step_id': rec.id,
+                        'default_mail_template_id': template.id,
+                    },
+                }
+
+    def validate_information_function(self):
+        for rec in self:
+            print('i work')
+            last_state = int(rec.state)
+            actuel_state = int(rec.state) + 1
+            rec.state = str(actuel_state)
+            rec.state_etape = '2'
+            rec.raison_refus = False
+            last_track = self.env['wk.tracking.ponctuel'].search([('ponctuel_id', '=', rec.workflow.id),
+                                                                  ('state', '=', last_state)])
+            if last_track:
+                last_track.date_fin = fields.Date.today()
+            self.env['wk.tracking.ponctuel'].create({'ponctuel_id': rec.workflow.id,
+                                            'state': rec.state,
+                                            'date_debut': fields.Date.today(),
+                                            'is_revision': True if rec.raison_refus else False,
+                                            'comment': False})
+            if actuel_state == '11':
+                rec.date_fin = fields.Date.today()
+            if rec.etape.sequence == 1:
+                step_2 = rec.workflow.states.filtered(lambda l: l.sequence == 2)
+                if not step_2:
+                    rec.env['wk.etape.ponctuel'].create({
+                                                    'workflow': rec.workflow.id,
+                                                    'etape': self.env.ref('dept_comm.principe_2').id,
+                                                    'nom_client': rec.nom_client.id})
+
+    def a_revoir(self):
+        for rec in self:
+            view_id = self.env.ref('dept_comm.retour_ponctuel_form').id
+            return {
+                'name': 'سبب طلب المراجعة',
+                'type': 'ir.actions.act_window',
+                'view_mode': 'form',
+                'res_model': 'wk.ponctuel.retour',
+                'view_id': view_id,
+                'target': 'new',
+                'context': {'default_ponctuel_id': rec.workflow.id,
+                            'default_state': rec.workflow.state}
+            }
+
+
+    def action_open_risk(self):
+        for rec in self:
+            view_id = self.env.ref('dept_comm.scoring_inherit_view_form').id
+            if not rec.risk_scoring:
+                scoring = self.env['risk.scoring'].create({
+                    'partner_id': rec.nom_client.id,
+                    'ponctuel_id': rec.workflow.id
+                })
+                rec.workflow.risk_scoring = scoring.id
+            return {
+                'name': 'ادارة المخاطر',
+                'res_model': 'risk.scoring',
+                'view_mode': 'form',
+                'res_id': rec.risk_scoring.id,
+                'view_id': view_id,
+                'type': 'ir.actions.act_window',
+            }
+    @api.onchange('annee_fiscal_list')
+    def change_annee(self):
+        for rec in self:
+            rec.annee_fiscal = int(rec.annee_fiscal_list.name)
+            if rec.annee_fiscal_list:
+                rec.situations_fin.filtered(lambda l: l.sequence == 0).write({
+                    'year1': rec.annee_fiscal,
+                    'year2': rec.annee_fiscal - 1,
+                    'year3': rec.annee_fiscal - 2,
+                })
+                rec.mouvement.filtered(lambda l: l.sequence == 0).write({
+                    'n_dz': rec.annee_fiscal,
+                    'n1_dz': rec.annee_fiscal - 1,
+                    'n2_dz': rec.annee_fiscal - 2,
+                    'n3_dz': rec.annee_fiscal - 3,
+                })
+                rec.mouvement_group.filtered(lambda l: l.company == 'السنة').write({'n_dz': rec.annee_fiscal,
+                                                                                    'n1_dz': rec.annee_fiscal - 1,
+                                                                                    'n2_dz': rec.annee_fiscal - 2,
+                                                                                    'sequence': 0})
+                rec.companies_fisc.filtered(lambda l: l.sequence == 0).write({
+                    'year_4': rec.annee_fiscal,
+                    'year_3': rec.annee_fiscal - 1,
+                    'year_2': rec.annee_fiscal - 2,
+                    'year_1': rec.annee_fiscal - 3,
+                })
+                rec.bilan1_id.filtered(lambda l: l.declaration == 'السنة').write({
+                    'year_1': rec.annee_fiscal - 3,
+                    'year_2': rec.annee_fiscal - 2,
+                    'year_3': rec.annee_fiscal - 1,
+                    'year_4': rec.annee_fiscal, })
+                rec.bilan2_id.filtered(lambda l: l.declaration == 'السنة').write({
+                    'year_1': rec.annee_fiscal - 3,
+                    'year_2': rec.annee_fiscal - 2,
+                    'year_3': rec.annee_fiscal - 1,
+                    'year_4': rec.annee_fiscal})
+                rec.bilan3_id.filtered(lambda l: l.declaration == 'السنة').write({
+                    'year_1': rec.annee_fiscal - 3,
+                    'year_2': rec.annee_fiscal - 2,
+                    'year_3': rec.annee_fiscal - 1,
+                    'year_4': rec.annee_fiscal})
+                rec.bilan4_id.filtered(lambda l: l.declaration == 'السنة').write({
+                    'year_1': rec.annee_fiscal - 3,
+                    'year_2': rec.annee_fiscal - 2,
+                    'year_3': rec.annee_fiscal - 1,
+                    'year_4': rec.annee_fiscal})
+                rec.bilan5_id.filtered(lambda l: l.declaration == 'السنة').write({
+                    'year_1': rec.annee_fiscal - 3,
+                    'year_2': rec.annee_fiscal - 2,
+                    'year_3': rec.annee_fiscal - 1,
+                    'year_4': rec.annee_fiscal})
+    def action_get_view(self):
+        for rec in self:
+            view_id = self.env.ref('dept_comm.view_wk_etape_ponctuel_form').id
+            return {
+                'type': 'ir.actions.act_window',
+                'name': _('الفرع'),
+                'view_mode': 'form',
+                'res_model': 'wk.etape.ponctuel',
+                'res_id': rec.id,
+                'views': [[view_id, 'form']],
+            }
+
+    @api.model
+    def create(self, vals):
+        res = super(Etape, self).create(vals)
+        count = 0
+        for item in list_situation:
+            line = self.env['wk.situation.fin'].create({'type': item,
+                                                        'sequence': count,
+                                                        'step_id': res.id})
+            count += 1
+        res.situations_fin.filtered(lambda l: l.sequence == 0).write({
+            'year1': res.annee_fiscal,
+            'year2': res.annee_fiscal - 1,
+            'year3': res.annee_fiscal - 2,
+        })
+        for item in list_garantie:
+            line = self.env['wk.garantie.conf'].create({'info': item, 'step_id': res.id})
+        for item in list_garantie_fisc:
+            line = self.env['wk.garantie.fin'].create({'info': item, 'step_id': res.id})
+        for item in list_autre_term:
+            line = self.env['wk.garantie.autres'].create({'info': item, 'step_id': res.id})
+        for item in List_risque:
+            line = self.env['wk.risque.line'].create({'declaration': item, 'step_id': res.id})
+        for item in List_position:
+            line = self.env['wk.position'].create({'name': item, 'step_id': res.id})
+        count = 0
+        for item in list_mouvement:
+            line = self.env['wk.mouvement'].create({'mouvement': item,
+                                                    'step_id': res.id,
+                                                    'sequence': count})
+            count += 1
+        res.mouvement.filtered(lambda l: l.sequence == 0).write({
+            'n_dz': res.annee_fiscal,
+            'n1_dz': res.annee_fiscal - 1,
+            'n2_dz': res.annee_fiscal - 2,
+            'n3_dz': res.annee_fiscal - 3,
+        })
+        self.env['wk.mouvement.group'].create({'company': 'السنة',
+                                               'step_id': res.id,
+                                               'n_dz': res.annee_fiscal,
+                                               'n1_dz': res.annee_fiscal - 1,
+                                               'n2_dz': res.annee_fiscal - 2,
+                                               'sequence': 0})
+        count = 0
+        for item in list_fisc:
+            line = self.env['wk.companies.fisc'].create({'declaration': item,
+                                                         'sequence': count,
+                                                         'step_id': res.id})
+            count += 1
+        res.companies_fisc.filtered(lambda l: l.sequence == 0).write({
+            'year_4': res.annee_fiscal,
+            'year_3': res.annee_fiscal - 1,
+            'year_2': res.annee_fiscal - 2,
+            'year_1': res.annee_fiscal - 3,
+        })
+        count = 1
+        line = self.env['wk.bilan'].create({'declaration': 'السنة',
+                                            'step_id': res.id,
+                                            'sequence': 0})
+
+        for index, item in list_bil:
+            line = self.env['wk.bilan'].create({'declaration': item,
+                                                'step_id': res.id,
+                                                'sequence': index})
+            count += 1
+        count = 1
+        for item in list_recap:
+            line = self.env['wk.recap'].create({'declaration': item, 'step_id': res.id, 'sequence': count})
+            count += 1
+        count = 1
+        for item in list_var:
+            line = self.env['wk.variable'].create({'var': item, 'step_id': res.id, 'sequence': count})
+            count += 1
+
+        return res
 
 def view_viz(data1, data2):
     year = ["N-2", "N-1", "N"]

@@ -3,6 +3,7 @@ from odoo import api, fields, models, tools, _, Command
 from odoo.exceptions import UserError
 from odoo.tools.misc import get_lang
 
+
 class ConfirmationDemandeCreditSend(models.TransientModel):
     _name = 'confirmation.mail.send'
     _description = "Confirmation Demande Credit Send"
@@ -10,6 +11,7 @@ class ConfirmationDemandeCreditSend(models.TransientModel):
     company_id = fields.Many2one(comodel_name='res.company', compute='_compute_company_id', store=True)
     demande_credit_ids = fields.Many2many(comodel_name='wk.workflow.ponctuel')
     folder_id = fields.Many2one(comodel_name='wk.workflow.ponctuel')
+    step_id = fields.Many2one(comodel_name='wk.etape.ponctuel')
 
     # == PRINT ==
     enable_download = fields.Boolean(compute='_compute_enable_download')
@@ -244,6 +246,9 @@ class ConfirmationDemandeCreditSend(models.TransientModel):
         print(self.env.context)
         if not self.env.context.get('relance'):
             self.folder_id.validate_information_function()
+        if 'is_step' in self.env.context:
+            if self.env.context.get('is_step'):
+                self.step_id.validate_information_function()
 
 
 class RevoirState(models.TransientModel):

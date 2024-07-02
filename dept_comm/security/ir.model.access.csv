@@ -8,3 +8,5 @@ access_wk_tracking_ponctuel_financial,access.wk.tracking.ponctuel,model_wk_track
 access_wk_state_ponctuel_financial,access.wk.state.ponctuel,model_wk_state_ponctuel,,1,1,1,1
 
 access_wk_ponctuel_retour_financial,access.wk.ponctuel.retour,model_wk_ponctuel_retour,,1,1,1,1
+
+access_wk_ponctuel_charge_financial,access.wk.ponctuel.charge,model_wk_ponctuel_charge,,1,1,1,1

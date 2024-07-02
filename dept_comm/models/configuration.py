@@ -180,12 +180,30 @@ class TCR(models.Model):
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
 
+    @api.model
+    def create(self, vals):
+        if 'step_id' in self.env.context:
+            vals['step_id'] = self.env.context.get('step_id')
+        res = super(TCR, self).create(vals)
+        if res.step_id:
+            res.step_id.tcr_id = res.id
+        return res
+
 
 class Passif(models.Model):
     _inherit = 'import.ocr.passif'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
+
+    @api.model
+    def create(self, vals):
+        if 'step_id' in self.env.context:
+            vals['step_id'] = self.env.context.get('step_id')
+        res = super(Passif, self).create(vals)
+        if res.step_id:
+            res.step_id.passif_id = res.id
+        return res
 
 
 class Actif(models.Model):
@@ -194,9 +212,80 @@ class Actif(models.Model):
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
 
+    @api.model
+    def create(self, vals):
+        if 'step_id' in self.env.context:
+            vals['step_id'] = self.env.context.get('step_id')
+        res = super(Actif, self).create(vals)
+        if res.step_id:
+            res.step_id.actif_id = res.id
+        return res
 
 class BilanFisc(models.Model):
     _inherit = 'wk.bilan'
+    _description = 'Bilan fiscal'
+    _order = 'sequence,id'
+
+    ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
+    @api.model
+    def create(self, vals):
+        res = super(BilanFisc, self).create(vals)
+        if 'bilan_id' in vals:
+            vals.pop('bilan_id')
+        if 'step_id' in vals:
+            vals['bilan'] = res.id
+            if res.categorie == '1':
+                self.env['wk.bilan.cat1'].create(vals)
+            if res.categorie == '2':
+                self.env['wk.bilan.cat2'].create(vals)
+            if res.categorie == '3':
+                self.env['wk.bilan.cat3'].create(vals)
+            if res.categorie == '4':
+                self.env['wk.bilan.cat4'].create(vals)
+            if res.categorie == '5':
+                self.env['wk.bilan.cat5'].create(vals)
+        return res
+
+
+class BilanFisc1(models.Model):
+    _inherit = 'wk.bilan.cat1'
+    _description = 'Bilan fiscal'
+    _order = 'sequence,id'
+
+    ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
+
+
+class BilanFisc2(models.Model):
+    _inherit = 'wk.bilan.cat2'
+    _description = 'Bilan fiscal'
+    _order = 'sequence,id'
+
+    ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
+
+
+class BilanFisc3(models.Model):
+    _inherit = 'wk.bilan.cat3'
+    _description = 'Bilan fiscal'
+    _order = 'sequence,id'
+
+    ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
+
+
+class BilanFisc4(models.Model):
+    _inherit = 'wk.bilan.cat4'
+    _description = 'Bilan fiscal'
+    _order = 'sequence,id'
+
+    ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
+
+
+class BilanFisc5(models.Model):
+    _inherit = 'wk.bilan.cat5'
     _description = 'Bilan fiscal'
     _order = 'sequence,id'
 
@@ -323,3 +412,21 @@ class States(models.Model):
 
     name = fields.Char(string='Nom')
     sequence = fields.Integer(string='Nom')
+
+
+class PlanCharge(models.Model):
+    _name = 'wk.ponctuel.charge'
+
+    name = fields.Char(string='العميل')
+    contrat_type = fields.Selection([('soumission', 'En soumission'),
+                                     ('attribu', 'Attribué'),
+                                     ('signature', 'En signature'),
+                                     ('realisation', 'En réalisation')],
+                                    string='حالة الصفقة')
+    montant_ht = fields.Float(string='المبلغ H.T KDA')
+    date_debut = fields.Date(string='تاريخ البدء')
+    niveau = fields.Float(string='مستوى الانجاز %')
+    besoin = fields.Float(string='الاحتياجات التمويلية')
+    ponctuel_id = fields.Many2one('wk.workflow.ponctuel',
+                                  string='Ponctuel')
+

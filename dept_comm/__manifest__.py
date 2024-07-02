@@ -12,6 +12,7 @@
             'reports/mail_template.xml',
             'data/state_data.xml',
             'reports/report.xml',
+            'views/etape.xml',
             'views/workflow_new.xml',
             'views/wizard.xml'],
     # data files containing optionally loaded demonstration data
