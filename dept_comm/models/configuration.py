@@ -21,7 +21,7 @@ class KycDetail(models.Model):
 class Partenaire(models.Model):
     _inherit = 'wk.partenaire'
     _description = 'Partenaire du client'
-    
+
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
 
@@ -29,18 +29,18 @@ class Partenaire(models.Model):
 class EquipeGestion(models.Model):
     _inherit = 'wk.gestion'
     _description = 'Equipe de gestion'
-    
+
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-    
-    
+
+
 class Taillefin(models.Model):
     _inherit = 'wk.taille'
     _description = 'La taille et la structure du financement requis'
-    
+
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-    
+
 
 class SituationBancaire(models.Model):
     _inherit = 'wk.situation'
@@ -49,13 +49,14 @@ class SituationBancaire(models.Model):
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
 
+
 class SituationFinanciere(models.Model):
     _inherit = 'wk.situation.fin'
     _description = 'Situation financière'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-    
+
 
 class Fournisseur(models.Model):
     _inherit = 'wk.fournisseur'
@@ -63,7 +64,7 @@ class Fournisseur(models.Model):
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-    
+
 
 class Client(models.Model):
     _inherit = 'wk.client'
@@ -79,7 +80,7 @@ class Companies(models.Model):
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-    
+
 
 class FaciliteAccorde(models.Model):
     _inherit = 'wk.facilite.accorde'
@@ -87,7 +88,7 @@ class FaciliteAccorde(models.Model):
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-    
+
 
 class Detail(models.Model):
     _inherit = 'wk.detail.garantie'
@@ -95,7 +96,7 @@ class Detail(models.Model):
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-    
+
 
 class DetailGarantiePropose(models.Model):
     _inherit = 'wk.detail.garantie.propose'
@@ -103,28 +104,28 @@ class DetailGarantiePropose(models.Model):
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-    
+
 
 class Ganrantie(models.Model):
     _inherit = 'wk.garantie.conf'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-    
-    
+
+
 class GanrantieFin(models.Model):
     _inherit = 'wk.garantie.fin'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-    
+
 
 class GanrantieAutre(models.Model):
     _inherit = 'wk.garantie.autres'
-    
+
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-    
+
 
 class Risque(models.Model):
     _inherit = 'wk.risque.line'
@@ -276,7 +277,8 @@ class Tracking(models.Model):
     step_id = fields.Many2one('wk.etape.ponctuel')
     date_debut = fields.Date(string='تاريخ البدء')
     date_fin = fields.Date(string='تاريخ الانتهاء')
-    date_difference = fields.Char(string='الوقت المستغرق', compute='_compute_date')
+    date_difference = fields.Char(
+        string='الوقت المستغرق', compute='_compute_date')
     state = fields.Selection([('1', 'الفرع'),
                               ('2', 'إدارة الاعمال التجارية'),
                               ('3', 'إدارة  الدراسات الائتمانية للمؤسسات'),
@@ -294,7 +296,8 @@ class Tracking(models.Model):
     is_revision = fields.Boolean()
     time = fields.Integer(string='الاجال', related='time_id.time')
     difference = fields.Integer(string='الاجال', )
-    time_id = fields.Many2one('wk.time', string='الاجال', compute='compute_time')
+    time_id = fields.Many2one(
+        'wk.time', string='الاجال', compute='compute_time')
     depasse = fields.Boolean(string='depasse')
 
     def _compute_date(self):
@@ -323,3 +326,20 @@ class States(models.Model):
 
     name = fields.Char(string='Nom')
     sequence = fields.Integer(string='Nom')
+
+
+class PlanCharge(models.Model):
+    _name = 'wk.ponctuel.charge'
+
+    name = fields.Char(string='العميل')
+    contrat_type = fields.Selection([('soumission', 'En soumission'),
+                                     ('attribu', 'Attribué'),
+                                     ('signature', 'En signature'),
+                                     ('realisation', 'En réalisation')],
+                                    string='حالة الصفقة')
+    montant_ht = fields.Float(string='المبلغ H.T KDA')
+    date_debut = fields.Date(string='تاريخ البدء')
+    niveau = fields.Float(string='مستوى الانجاز %')
+    besoin = fields.Float(string='الاحتياجات التمويلية')
+    ponctuel_id = fields.Many2one('wk.workflow.ponctuel',
+                                  string='Ponctuel')
