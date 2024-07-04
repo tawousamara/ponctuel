@@ -58,14 +58,14 @@
         <field name="model">wk.workflow.ponctuel</field>
         <field name="arch" type="xml">
             <form create="0" duplicate="false" delete="0">
-                <header><!--
-                    <button type="action" name="%(dept_wk.global_report)d" class="btn-primary" string="التقرير النهائي"
-                            width="10%"/>-->
+                <header>
+                    <button type="action" name="%(dept_comm.global_report)d" class="btn-primary" string="التقرير النهائي"
+                            width="10%"/>
 
-                    <button type="object" name="relance" class="btn-primary" string="Relancer"
+                    <button type="object" name="relance" class="btn-secondary" string="Relancer"
                             invisible="state in ['1','11']"
                             width="10%"/>
-                    <button type="object" name="a_revoir" class="btn-primary" string="للمراجعة"
+                    <button type="object" name="a_revoir" class="btn-secondary" string="للمراجعة"
                             invisible="state in ['1','11']"
                             width="10%"/>
                     <field name="state" widget="statusbar"/>
@@ -110,8 +110,8 @@
                                        domain="[('nom_client', '=', nom_client)]"/>
                                 <field name="explanation"/>
                             </group>
-                            <field name="plan_ids" editable="bottom">
-                                <tree>
+                            <field name="plan_ids" >
+                                <tree editable="bottom">
                                     <field name="contrat_type"/>
                                     <field name="name"/>
                                     <field name="montant_ht"/>
