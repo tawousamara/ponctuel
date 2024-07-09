@@ -180,6 +180,129 @@ class ApiController(http.Controller):
             }
             client_data.append(element)
 
+        step2 = dossier.states.filtered(lambda l:l.sequence == 2)
+        '''مديرية الاعمال التجارية'''
+
+        # تفاصيل الضمانات
+        # الضمانات العقارية الحالية
+        detail_garantie_actuel_ids_data = []
+        for item in step2.detail_garantie_actuel_ids:
+            niveau = ''
+            if item.niveau == '3':
+                niveau = 'منخفض'
+            elif item.niveau == '2':
+                niveau = 'متوسط'
+            elif item.niveau == '1':
+                niveau = 'عالي'
+            element = {
+                'type_garantie': item.type_garantie.name,
+                'type_contrat': item.type_contrat.name,
+                'montant': item.montant,
+                'date': item.date,
+                'recouvrement': item.recouvrement,
+                'niveau': niveau,
+            }
+            detail_garantie_actuel_ids_data.append(element)
+
+        # الضمانات العقارية المقترحة
+        detail_garantie_propose_ids_data = []
+        for item in step2.detail_garantie_propose_ids:
+            niveau = ''
+            if item.niveau == '3':
+                niveau = 'منخفض'
+            elif item.niveau == '2':
+                niveau = 'متوسط'
+            elif item.niveau == '1':
+                niveau = 'عالي'
+            element = {
+                'type_garantie': item.type_garantie.name,
+                'type_contrat': item.type_contrat.name,
+                'montant': item.montant,
+                'date': item.date,
+                'recouvrement': item.recouvrement,
+                'niveau': niveau,
+            }
+            detail_garantie_propose_ids_data.append(element)
+
+        # الشروط السابقة/المقترحة و الموافق عليها من لجان التمويل
+        garantie_conf_data = []
+        for item in step2.garantie_conf:
+            answer = ''
+            if item.answer == 'oui':
+                answer = 'نعم'
+            elif item.answer == 'non':
+                answer = 'لا'
+            element = {
+                'info': item.info,
+                'answer': answer,
+                'detail': item.detail,
+            }
+            garantie_conf_data.append(element)
+
+        # الشروط المالية
+        garantie_fin_data = []
+        for item in step2.garantie_fin:
+            answer = ''
+            if item.answer == 'oui':
+                answer = 'نعم'
+            elif item.answer == 'non':
+                answer = 'لا'
+            element = {
+                'info': item.info,
+                'answer': answer,
+                'detail': item.detail,
+            }
+            garantie_fin_data.append(element)
+        # الشروط المالية
+        garantie_autres_data = []
+        for item in step2.garantie_autres:
+            answer = ''
+            if item.answer == 'oui':
+                answer = 'نعم'
+            elif item.answer == 'non':
+                answer = 'لا'
+            element = {
+                'info': item.info,
+                'answer': answer,
+                'detail': item.detail,
+            }
+            garantie_autres_data.append(element)
+
+        # مركزية المخاطر
+        risque_central_data = []
+        for item in step2.risque_central:
+            element = {
+                'declaration': item.declaration,
+                'montant_esalam_dz_donne': item.montant_esalam_dz_donne,
+                'montant_esalam_dz_used': item.montant_esalam_dz_used,
+                'montant_other_dz_donne': item.montant_other_dz_donne,
+                'montant_other_dz_used': item.montant_other_dz_used,
+                'montant_total_dz_donne': item.montant_total_dz_donne,
+                'montant_total_dz_used': item.montant_total_dz_used,
+            }
+            risque_central_data.append(element)
+
+        # التسهيلات القائمة مع المصرف
+        facitlite_existante_data = []
+        for item in step2.facitlite_existante:
+            demande_ids = ''
+            if len(item.type_demande_ids) != 1:
+                for line in item.type_demande_ids:
+                    demande_ids += line.name + ' / '
+            else:
+                for line in item.type_demande_ids:
+                    demande_ids += line.name
+            element = {
+                'company': item.company,
+                'facilite': item.facilite.name,
+                'type_demande_ids': demande_ids,
+                'brut_da': item.brut_da,
+                'net_da': item.net_da,
+                'montant_total_dz_donne': item.montant_total_dz_donne,
+                'montant_total_dz_used': item.montant_total_dz_used,
+            }
+            facitlite_existante_data.append(element)
+
         dossier_data = {
             #Champs bruts
             'classification': step1.classification.name if step1.classification else '',
@@ -206,6 +329,15 @@ class ApiController(http.Controller):
             'gestion': gestion_data if step1.gestion else [],
             'fournisseur': fournisseur_data if step1.fournisseur else [],
             'client': client_data if step1.client else [],
+            # commercial
+            'detail_garantie_actuel_ids': detail_garantie_actuel_ids_data if step2.detail_garantie_actuel_ids else [],
+            'detail_garantie_propose_ids': detail_garantie_propose_ids_data if step2.detail_garantie_propose_ids else [],
+            'garantie_conf': garantie_conf_data if step2.garantie_conf else [],
+            'garantie_fin': garantie_fin_data if step2.garantie_fin else [],
+            'garantie_autres': garantie_autres_data if step2.garantie_autres else [],
+            'risque_central': risque_central_data if step2.risque_central else [],
+            'facitlite_existante': facitlite_existante_data if step2.facitlite_existante else [],
+
         }
         return Response(json.dumps({'data': dossier_data}), status=200, headers={'Content-Type': 'application/json'})
 
