@@ -517,7 +517,7 @@
                                     <table class="reversed-table" t-if="doc.plan_ids">
                                         <thead>
                                             <tr>
-                                                <th class="title-cell" style="text-align: center" colspan="4">Plan des charges
+                                                <th class="title-cell" style="text-align: center" colspan="6">Plan des charges
                                                 </th>
                                             </tr>
                                             <tr>

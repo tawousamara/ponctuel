@@ -1,7 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 
 access_wk_workflow_ponctuel_financial,access.wk.workflow.ponctuel,model_wk_workflow_ponctuel,,1,1,1,0
-access_wk_etape_ponctuel_financial,access.wk.etape.ponctuel,model_wk_etape_ponctuel,,1,1,1,0
+access_wk_etape_ponctuel_financial,access.wk.etape.ponctuel,model_wk_etape_ponctuel,,1,1,1,1
 access_confirmation_mail_send_financial,access.confirmation.mail.send,model_confirmation_mail_send,,1,1,1,0
 
 access_wk_tracking_ponctuel_financial,access.wk.tracking.ponctuel,model_wk_tracking_ponctuel,,1,1,1,1

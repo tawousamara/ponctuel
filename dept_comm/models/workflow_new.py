@@ -609,13 +609,25 @@ class Ponctuel(models.Model):
     def action_start(self):
         for rec in self:
             states = rec.workflow_old.states.filtered(lambda l: l.sequence in [1, 2])
+            states_ids = rec.workflow_old.states
+            print('states_ids', states_ids)
+            values = {}
+            for etape in states_ids:
+                dict1 = get_values(rec, etape)
+                values.update(dict1)
+            vals = values
+            vals.pop('etape')
+            rec.write(vals)
             for etape in states:
-                vals = get_values(rec, etape)
+                exist = rec.states.filtered(lambda l: l.sequence == etape.sequence)
+                if exist:
+                    exist.unlink()
                 vals['workflow'] = rec.id
+                if etape.sequence == 1:
+                    vals['etape'] = self.env.ref('dept_comm.principe_1').id
+                elif etape.sequence == 2:
+                    vals['etape'] = self.env.ref('dept_comm.principe_2').id
                 etape_new = self.env['wk.etape.ponctuel'].create(vals)
-                vals.pop('etape')
-                vals.pop('workflow')
-                rec.write(vals)
                 get_lists(self, rec, etape_new, etape)
 
     def open_tracking(self):
@@ -704,8 +716,9 @@ class Ponctuel(models.Model):
 
 
 def get_values(workflow, etape):
+    values = {}
     if etape.sequence == 1:
-        return {
+        values = {
             'etape': etape.env.ref('dept_comm.principe_1').id,
             'nom_client': etape.nom_client.id,
             'branche': etape.branche.id,
@@ -722,7 +735,7 @@ def get_values(workflow, etape):
             'description_company': etape.description_company,
         }
     elif etape.sequence == 2:
-        return {
+        values = {
             'etape': etape.env.ref('dept_comm.principe_2').id,
             'taux_change': etape.taux_change,
             'annee_fiscal': etape.annee_fiscal,
@@ -734,13 +747,14 @@ def get_values(workflow, etape):
             'garanties_demande_ids': etape.garantie_ids.ids,
             'annee_fiscal_list': etape.annee_fiscal_list.id,
         }
-    elif etape.sequence == 4:
-        return {
+    elif etape.sequence == 3:
+        values = {
             'analyse_secteur_act': etape.analyse_secteur_act,
             'analyse_concurrence': etape.analyse_concurrence,
             'ampleur_benefice': etape.ampleur_benefice,
             'analyse_relation': etape.analyse_relation,
         }
+    return values
 
 
 def get_lists(self, etape_new,step , etape_old):
@@ -852,6 +866,7 @@ def get_lists(self, etape_new,step , etape_old):
         etape_new.bilan5_id.unlink()
         #etape_new.companies_fisc.unlink()
         etape_new.mouvement_group.unlink()
+        etape_new.mouvement.unlink()
         etape_new.recap_ids.unlink()
         etape_new.var_ids.unlink()
         etape_new.weakness_ids.unlink()
@@ -875,6 +890,7 @@ def get_lists(self, etape_new,step , etape_old):
         step.bilan4_id.unlink()
         step.bilan5_id.unlink()
         #step.companies_fisc.unlink()
+        step.mouvement.unlink()
         step.mouvement_group.unlink()
         step.recap_ids.unlink()
         step.var_ids.unlink()
@@ -952,6 +968,16 @@ def get_lists(self, etape_new,step , etape_old):
                   'variante': doc.variante,
                   'remark': doc.remark,
                   'ponctuel_id': etape_new.id})"""
+        for doc in etape_old.mouvement:
+            self.env['wk.mouvement'].create({'mouvement': doc.mouvement,
+                  'sequence': doc.sequence,
+                  'n3_dz': doc.n3_dz,
+                  'n2_dz': doc.n2_dz,
+                  'n1_dz': doc.n1_dz,
+                  'n_dz': doc.n_dz,
+                  'remarques': doc.remarques,
+                  'ponctuel_id': etape_new.id,
+                  'step_id': step.id})
         for doc in etape_old.mouvement_group:
             self.env['wk.mouvement.group'].create({'company': doc.company,
                                                       'sequence': doc.sequence,
@@ -1025,4 +1051,3 @@ def get_lists(self, etape_new,step , etape_old):
                 'is_null_1': doc.is_null_1,
                 'variante': doc.variante,
             })
-        print(etape_new.bilan_id)
