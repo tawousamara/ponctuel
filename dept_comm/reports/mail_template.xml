@@ -26,7 +26,6 @@
                         <a t-att-href="'/web#id=' + str(object.workflow.id) + '&amp;view_type=form&amp;model=wk.workflow.dashboard'">
                             <t t-out="object.workflow.name"/>
                         </a>
-                        <br/>
                         نشكر لكم تفهمكم وتعاونكم.
                         <br/>
                         أطيب التحيات،

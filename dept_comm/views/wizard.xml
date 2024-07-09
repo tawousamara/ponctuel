@@ -82,6 +82,10 @@
                             <t t-out="object.name"/>
                         </a>
                         <br/>
+                        الغرض من الطلب:
+                        <t t-out="object.explanation"/>
+
+                        <br/>
                         نشكر لكم تفهمكم وتعاونكم.
                         <br/>
                         أطيب التحيات،

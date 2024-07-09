@@ -182,6 +182,8 @@
                         <div class="page page-content">
                             <div class="justify-content-start">
                                 <table class="reversed-table">
+                                    <t t-set="step_1"
+                                       t-value="doc.states.filtered(lambda l: l.sequence == 1)"/>
                                     <tbody>
                                         <tr>
                                             <td style="font-family: 'NotoArabic-Regular';padding: 5px;vertical-align: middle;"
@@ -190,7 +192,7 @@
                                             </td>
                                             <td colspan="3"
                                                 style="font-family: 'NotoArabic-Regular';padding: 5px;vertical-align: middle;">
-                                                <t t-esc="doc.nom_client.nif"/>
+                                                <t t-esc="step_1.nom_client.nif"/>
                                             </td>
                                             <td class="title-cell"
                                                 style="font-family: 'NotoArabic-Regular';padding: 5px;vertical-align: middle;">
@@ -199,7 +201,7 @@
                                             </td>
                                             <td colspan="5"
                                                 style="font-family: 'NotoArabic-Regular';padding: 5px;vertical-align: middle;">
-                                                <t t-esc="doc.nom_client.rc"/>
+                                                <t t-esc="step_1.nom_client.rc"/>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -220,7 +222,7 @@
                                                     المكلف بالاعمال التجارية
                                                 </td>
                                                 <td colspan="2">
-                                                    <t t-esc="doc.assigned_to_commercial.partner_id.nom_arabe"/>
+                                                    <t t-esc="step_1.assigned_to_commercial.partner_id.nom_arabe"/>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -233,7 +235,7 @@
                                                     مسؤول العلاقة
                                                 </td>
                                                 <td colspan="2">
-                                                    <t t-esc="doc.assigned_to_commercial.partner_id.nom_arabe"/>
+                                                    <t t-esc="step_1.assigned_to_commercial.partner_id.nom_arabe"/>
                                                 </td>
                                             </tr>
 
@@ -242,13 +244,13 @@
                                                     اسم المتعامل
                                                 </td>
                                                 <td colspan="2">
-                                                    <t t-esc="doc.nom_client.name"/>
+                                                    <t t-esc="step_1.nom_client.name"/>
                                                 </td>
                                                 <td class="title-cell">
                                                     اسم المجموعة
                                                 </td>
                                                 <td colspan="2">
-                                                    <t t-esc="doc.nom_client.groupe.name"/>
+                                                    <t t-esc="step_1.nom_client.groupe.name"/>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -256,13 +258,13 @@
                                                     النشاط الرئيسي
                                                 </td>
                                                 <td colspan="2">
-                                                    <t t-esc="doc.activity_description"/>
+                                                    <t t-esc="step_1.activity_description"/>
                                                 </td>
                                                 <td class="title-cell">
                                                     رمز النشاط
                                                 </td>
                                                 <td colspan="2">
-                                                    <t t-esc="doc.activity_code"/>
+                                                    <t t-esc="step_1.activity_code"/>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -270,13 +272,13 @@
                                                     النشاط الثانوي
                                                 </td>
                                                 <td colspan="2">
-                                                    <t t-esc="doc.activite_sec"/>
+                                                    <t t-esc="step_1.activite_sec"/>
                                                 </td>
                                                 <td class="title-cell">
                                                     رمز النشاط
                                                 </td>
                                                 <td colspan="2">
-                                                    <t t-esc="doc.activite.name"/>
+                                                    <t t-esc="step_1.activite.name"/>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -284,13 +286,13 @@
                                                     تاريخ القيد في السجل التجاري
                                                 </td>
                                                 <td colspan="2">
-                                                    <t t-esc="doc.date_inscription"/>
+                                                    <t t-esc="step_1.date_inscription"/>
                                                 </td>
                                                 <td class="title-cell">
                                                     تاريخ بداية النشاط
                                                 </td>
                                                 <td colspan="2">
-                                                    <t t-esc="doc.date_debut_activite"/>
+                                                    <t t-esc="step_1.date_debut_activite"/>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -298,13 +300,13 @@
                                                     راس المال التاسيسي
                                                 </td>
                                                 <td colspan="2">
-                                                    <t t-esc="'{0:,.2f}'.format(doc.nom_client.chiffre_affaire_creation / 1000)"/>
+                                                    <t t-esc="'{0:,.2f}'.format(step_1.nom_client.chiffre_affaire_creation / 1000)"/>
                                                 </td>
                                                 <td class="title-cell">
                                                     راس المال الحالي
                                                 </td>
                                                 <td colspan="2">
-                                                    <t t-esc="'{0:,.2f}'.format(doc.chiffre_affaire / 1000)"/>
+                                                    <t t-esc="'{0:,.2f}'.format(step_1.chiffre_affaire / 1000)"/>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -312,19 +314,19 @@
                                                     الفرع
                                                 </td>
                                                 <td>
-                                                    <t t-esc="doc.branche.name"/>
+                                                    <t t-esc="step_1.branche.name"/>
                                                 </td>
                                                 <td class="title-cell">
                                                     رقم الحساب
                                                 </td>
                                                 <td>
-                                                    <t t-esc="doc.num_compte"/>
+                                                    <t t-esc="step_1.num_compte"/>
                                                 </td>
                                                 <td class="title-cell">
                                                     تاريخ فتح الحساب
                                                 </td>
                                                 <td>
-                                                    <t t-esc="doc.date_ouverture_compte"/>
+                                                    <t t-esc="step_1.date_ouverture_compte"/>
                                                 </td>
                                             </tr>
 
@@ -334,7 +336,7 @@
                                                 </td>
                                                 <td colspan="5" style="padding: 0px">
                                                     <table class="reversed-table" style="margin:0px; border: none;"
-                                                           t-if="doc.tailles">
+                                                           t-if="step_1.tailles">
                                                         <thead>
                                                             <tr>
                                                                 <th class="title-cell">نوع التسهيلات</th>
@@ -345,7 +347,7 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            <t t-foreach="doc.tailles" t-as="line">
+                                                            <t t-foreach="step_1.tailles" t-as="line">
                                                                 <tr>
                                                                     <td>
                                                                         <t t-esc="line.type_demande.name"/>
@@ -383,7 +385,7 @@
                                 <br/>
                                 <!-- نبذة عن المتعامل -->
                                 <div class="table_deco">
-                                    <table class="reversed-table" t-if="doc.apropos">
+                                    <table class="reversed-table" t-if="step_1.apropos">
                                         <thead>
                                             <tr>
                                                 <th style="text-align: center" class="title-cell" colspan="5">
@@ -399,7 +401,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <t t-foreach="doc.apropos" t-as="line">
+                                            <t t-foreach="step_1.apropos" t-as="line">
                                                 <tr>
                                                     <td>
                                                         <t t-esc="line.nom_partenaire"/>
@@ -423,7 +425,7 @@
                                                     الاجمالي
                                                 </td>
                                                 <td>
-                                                    <t t-esc="int(sum(doc.apropos.mapped('pourcentage')) * 100)"/>%
+                                                    <t t-esc="int(sum(step_1.apropos.mapped('pourcentage')) * 100)"/>%
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -431,7 +433,7 @@
                                 </div>
                                 <br/>
                                 <!-- اعرف عميلك KYC -->
-                                <t t-set="has_kyc" t-value="doc.kyc.filtered(lambda l:l.answer != False)"/>
+                                <t t-set="has_kyc" t-value="step_1.kyc.filtered(lambda l:l.answer != False)"/>
                                 <div class="table_deco">
                                     <table class="reversed-table" t-if="len(has_kyc) != 0">
                                         <thead>
@@ -447,7 +449,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <t t-foreach="doc.kyc" t-as="line">
+                                            <t t-foreach="step_1.kyc" t-as="line">
                                                 <tr>
                                                     <td>
                                                         <t t-esc="line.info"/>
@@ -471,7 +473,7 @@
                                 <br/>
                                 <!-- فريق التسيير -->
                                 <div class="table_deco">
-                                    <table class="reversed-table" t-if="doc.gestion">
+                                    <table class="reversed-table" t-if="step_1.gestion">
                                         <thead>
                                             <tr>
                                                 <th class="title-cell" style="text-align: center" colspan="5">فريق
@@ -487,7 +489,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <t t-foreach="doc.gestion" t-as="line">
+                                            <t t-foreach="step_1.gestion" t-as="line">
                                                 <tr>
                                                     <td>
                                                         <t t-esc="line.name"/>
@@ -512,7 +514,50 @@
                                 <br/>
                                 <!-- الوضعية المصرفية والتزامات لدى الغير -->
                                 <div class="table_deco">
-                                    <table class="reversed-table" t-if="doc.situations">
+                                    <table class="reversed-table" t-if="doc.plan_ids">
+                                        <thead>
+                                            <tr>
+                                                <th class="title-cell" style="text-align: center" colspan="6">Plan des charges
+                                                </th>
+                                            </tr>
+                                            <tr>
+                                                <th class="title-cell">حالة الصفقة</th>
+                                                <th class="title-cell">العميل</th>
+                                                <th class="title-cell">المبلغ H.T KDA</th>
+                                                <th class="title-cell">تاريخ البدء</th>
+                                                <th class="title-cell">مستوى الانجاز %</th>
+                                                <th class="title-cell">الاحتياجات التمويلية</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="doc.plan_ids" t-as="line">
+                                                <tr>
+                                                    <td>
+                                                        <span t-field="line.contrat_type"/>
+                                                    </td>
+                                                    <td>
+                                                        <t t-esc="line.name"/>
+                                                    </td>
+                                                    <td style="text-align: right; direction: ltr;">
+                                                        <t t-esc="'{0:,.0f}'.format(line.montant_ht / 1000)"/>
+                                                    </td>
+                                                    <td>
+                                                        <t t-esc="line.date_debut"/>
+                                                    </td>
+                                                    <td style="text-align: right; direction: ltr;">
+                                                        <t t-esc="'{0:,.0f}'.format(line.niveau * 100)"/>%
+                                                    </td>
+                                                    <td style="text-align: right; direction: ltr;">
+                                                        <t t-esc="'{0:,.0f}'.format(line.besoin / 1000)"/>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <br/>
+                                <div class="table_deco">
+                                    <table class="reversed-table" t-if="step_1.situations">
                                         <thead>
                                             <tr>
                                                 <th class="title-cell" style="text-align: center" colspan="4">الوضعية
@@ -527,7 +572,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <t t-foreach="doc.situations" t-as="line">
+                                            <t t-foreach="step_1.situations" t-as="line">
                                                 <tr>
                                                     <td>
                                                         <t t-esc="line.banque.name"/>
@@ -613,7 +658,7 @@
                                 <br/>-->
                                 <!-- تفاصيل التسهيلات الممنوحة -->
                                 <div class="table_deco">
-                                    <table class="reversed-table" t-if="doc.facilite_accorde">
+                                    <table class="reversed-table" t-if="step_1.facilite_accorde">
                                         <thead>
                                             <tr>
                                                 <th colspan="7" style="text-align: center" class="title-cell">تفاصيل
@@ -669,10 +714,13 @@
                                     </table>
                                 </div>
                                 <br/>
+
+                                <t t-set="step_2"
+                                   t-value="doc.states.filtered(lambda l: l.sequence == 2)"/>
                                 <!-- تفاصيل الضمانات -->
                                 <div class="table_deco">
                                     <table class="reversed-table"
-                                           t-if="doc.detail_garantie_actuel_ids or doc.detail_garantie_propose_ids">
+                                           t-if="step_2.detail_garantie_actuel_ids or step_2.detail_garantie_propose_ids">
                                         <thead>
                                             <tr>
                                                 <th colspan="6" style="text-align: center; font-size: 17px"
@@ -695,7 +743,7 @@
                                                     الضمانات العقارية الحالية
                                                 </th>
                                             </tr>
-                                            <t t-foreach="doc.detail_garantie_actuel_ids" t-as="line">
+                                            <t t-foreach="step_2.detail_garantie_actuel_ids" t-as="line">
                                                 <tr>
                                                     <td>
                                                         <t t-esc="line.type_garantie.name"/>
@@ -730,7 +778,7 @@
                                                     تعليق
                                                 </td>
                                                 <td colspan="5">
-                                                    <t t-esc="doc.garantie_actuel_comment"/>
+                                                    <t t-esc="step_2.garantie_actuel_comment"/>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -738,7 +786,7 @@
                                                     الضمانات العقارية المقترحة
                                                 </th>
                                             </tr>
-                                            <t t-foreach="doc.detail_garantie_propose_ids" t-as="line">
+                                            <t t-foreach="step_2.detail_garantie_propose_ids" t-as="line">
                                                 <tr>
                                                     <td>
                                                         <t t-esc="line.type_garant"/>
@@ -773,7 +821,7 @@
                                                     تعليق
                                                 </td>
                                                 <td colspan="5">
-                                                    <t t-esc="doc.garantie_propose_comment"/>
+                                                    <t t-esc="step_2.garantie_propose_comment"/>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -782,10 +830,10 @@
                                 <br/>
                                 <!-- الشروط السابقة/المقترحة -->
                                 <t t-set="has_conf"
-                                   t-value="doc.garantie_conf.filtered(lambda l:l.answer != False)"/>
-                                <t t-set="has_fin" t-value="doc.garantie_fin.filtered(lambda l:l.answer != False)"/>
+                                   t-value="step_2.garantie_conf.filtered(lambda l:l.answer != False)"/>
+                                <t t-set="has_fin" t-value="step_2.garantie_fin.filtered(lambda l:l.answer != False)"/>
                                 <t t-set="has_autre"
-                                   t-value="doc.garantie_autres.filtered(lambda l:l.answer != False)"/>
+                                   t-value="step_2.garantie_autres.filtered(lambda l:l.answer != False)"/>
 
                                 <div class="table_deco">
                                     <table class="reversed-table"
@@ -805,7 +853,7 @@
                                         </thead>
                                         <tbody>
                                             <t t-if="len(has_conf) != 0">
-                                                <t t-foreach="doc.garantie_conf" t-as="line">
+                                                <t t-foreach="step_2.garantie_conf" t-as="line">
                                                     <tr>
                                                         <td>
                                                             <t t-esc="line.info"/>
@@ -830,7 +878,7 @@
                                                 </th>
                                             </tr>
                                             <t t-if="len(has_fin) != 0">
-                                                <t t-foreach="doc.garantie_fin" t-as="line">
+                                                <t t-foreach="step_2.garantie_fin" t-as="line">
                                                     <tr>
                                                         <td>
                                                             <t t-esc="line.info"/>
@@ -855,7 +903,7 @@
                                                 </th>
                                             </tr>
                                             <t t-if="len(has_autre) != 0">
-                                                <t t-foreach="doc.garantie_autres" t-as="line">
+                                                <t t-foreach="step_2.garantie_autres" t-as="line">
                                                     <tr>
                                                         <td>
                                                             <t t-esc="line.info"/>
@@ -881,16 +929,16 @@
                                 <br/>
                                 <!-- مركزية المخاطر -->
                                 <div class="table_deco">
-                                    <table class="reversed-table" t-if="doc.risque_central">
+                                    <table class="reversed-table" t-if="step_2.risque_central">
                                         <thead>
                                             <tr>
                                                 <th colspan="2" style="text-align: center" class="title-cell">
                                                     مركزية المخاطر بتاريخ:
-                                                    <t t-esc="doc.risque_date"/>
+                                                    <t t-esc="step_2.risque_date"/>
                                                 </th>
                                                 <th colspan="12" style="text-align: center" class="title-cell">
                                                     عدد البنوك المصرحة:
-                                                    <t t-esc="doc.nbr_banque"/>
+                                                    <t t-esc="step_2.nbr_banque"/>
                                                 </th>
                                             </tr>
                                             <tr>
@@ -917,7 +965,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <t t-foreach="doc.risque_central" t-as="line">
+                                            <t t-foreach="step_2.risque_central" t-as="line">
                                                 <tr>
                                                     <td class="title-cell" colspan="2">
                                                         <t t-esc="line.declaration"/>
@@ -947,7 +995,7 @@
                                                     ملاحظات
                                                 </td>
                                                 <td style="font-weight: bold;" colspan="6">
-                                                    <t t-esc="doc.comment_risk_central"/>
+                                                    <t t-esc="step_2.comment_risk_central"/>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -959,9 +1007,9 @@
                                                     دج) -->
                                 <div class="table_deco">
                                     <t t-set="year_mouvement"
-                                       t-value="doc.mouvement.filtered(lambda l: l.sequence == 0)"/>
+                                       t-value="step_2.mouvement.filtered(lambda l: l.sequence == 0)"/>
                                     <t t-set="mouvement_lines"
-                                       t-value="doc.mouvement.filtered(lambda l: l.sequence != 0)"/>
+                                       t-value="step_2.mouvement.filtered(lambda l: l.sequence != 0)"/>
                                     <table class="reversed-table" t-if="mouvement_lines">
                                         <thead>
                                             <tr>
@@ -1019,7 +1067,7 @@
                                             <tr>
                                                 <td class="title-cell">التوطين البنكي</td>
                                                 <td colspan="5">
-                                                    <t t-esc="doc.detail_mouvement"/>
+                                                    <t t-esc="step_2.detail_mouvement"/>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -1030,46 +1078,46 @@
                                 <div class="table_deco">
                                     <table class="reversed-table">
                                         <tbody>
-                                            <tr t-if="doc.description_company">
+                                            <tr t-if="step_1.description_company">
                                                 <td class="title-cell" width="25%">
                                                     تعريف الشركة
                                                 </td>
                                                 <td width="75%">
-                                                    <t t-esc="doc.description_company"/>
+                                                    <t t-esc="step_2.description_company"/>
                                                 </td>
                                             </tr>
-                                            <tr t-if="doc.unit_prod">
+                                            <tr t-if="step_1.unit_prod">
                                                 <td class="title-cell" width="25%">
                                                     وحدات الانتاج
                                                 </td>
                                                 <td width="75%">
-                                                    <t t-esc="doc.unit_prod"/>
+                                                    <t t-esc="step_1.unit_prod"/>
                                                 </td>
                                             </tr>
-                                            <tr t-if="doc.stock">
+                                            <tr t-if="step_1.stock">
                                                 <td class="title-cell" width="25%">
                                                     المخازن
                                                 </td>
                                                 <td width="75%">
-                                                    <t t-esc="doc.stock"/>
+                                                    <t t-esc="step_1.stock"/>
                                                 </td>
                                             </tr>
-                                            <tr t-if="doc.prod_company">
+                                            <tr t-if="step_1.prod_company">
                                                 <td class="title-cell" width="25%">
                                                     منتوجات الشركة
                                                 </td>
                                                 <td width="75%">
-                                                    <t t-esc="doc.prod_company"/>
+                                                    <t t-esc="step_1.prod_company"/>
                                                 </td>
                                             </tr>
-                                            <tr t-if="doc.position_tax">
+                                            <tr t-if="step_2.position_tax">
                                                 <td class="title-cell" width="25%">
                                                     الوضعية
                                                     الجبائية وشبه
                                                     الجبائية
                                                 </td>
                                                 <td style="padding: 0px" width="75%">
-                                                    <table class="reversed-table" t-if="doc.position_tax"
+                                                    <table class="reversed-table" t-if="step_2.position_tax"
                                                            style="margin:0px; border: none; border-collapse: collapse;">
                                                         <thead>
                                                             <tr>
@@ -1080,7 +1128,7 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            <t t-foreach="doc.position_tax" t-as="line">
+                                                            <t t-foreach="step_2.position_tax" t-as="line">
                                                                 <tr>
                                                                     <td class="title-cell">
                                                                         <t t-esc="line.name"/>
@@ -1104,12 +1152,12 @@
                                                     </table>
                                                 </td>
                                             </tr>
-                                            <tr t-if="doc.fournisseur">
+                                            <tr t-if="step_1.fournisseur">
                                                 <td class="title-cell" width="25%">
                                                     الموردين
                                                 </td>
                                                 <td style="padding: 0px" width="75%">
-                                                    <table class="reversed-table" t-if="doc.fournisseur"
+                                                    <table class="reversed-table" t-if="step_1.fournisseur"
                                                            style="margin:0px; border: none;">
                                                         <thead>
                                                             <tr>
@@ -1119,7 +1167,7 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            <t t-foreach="doc.fournisseur" t-as="line">
+                                                            <t t-foreach="step_1.fournisseur" t-as="line">
                                                                 <tr>
                                                                     <td width="25%">
                                                                         <t t-esc="line.name"/>
@@ -1143,12 +1191,12 @@
                                                     </table>
                                                 </td>
                                             </tr>
-                                            <tr t-if="doc.client">
+                                            <tr t-if="step_1.client">
                                                 <td class="title-cell" width="25%">
                                                     الزبائن
                                                 </td>
                                                 <td style="padding: 0px" width="75%">
-                                                    <table class="reversed-table" t-if="doc.client"
+                                                    <table class="reversed-table" t-if="step_1.client"
                                                            style="margin:0px; border: none;">
                                                         <thead>
                                                             <tr>
@@ -1158,7 +1206,7 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            <t t-foreach="doc.client" t-as="line">
+                                                            <t t-foreach="step_1.client" t-as="line">
                                                                 <tr>
                                                                     <td width="25%">
                                                                         <t t-esc="line.name"/>
@@ -1182,28 +1230,28 @@
                                                     </table>
                                                 </td>
                                             </tr>
-                                            <tr t-if="doc.analyse_relation">
+                                            <tr t-if="step_2.analyse_relation">
                                                 <td class="title-cell" width="25%">
                                                     اهمية العلاقة
                                                 </td>
                                                 <td width="75%">
-                                                    <t t-esc="doc.analyse_relation"/>
+                                                    <t t-esc="step_2.analyse_relation"/>
                                                 </td>
                                             </tr>
-                                            <tr t-if="doc.analyse_secteur_act">
+                                            <tr t-if="step_2.analyse_secteur_act">
                                                 <td class="title-cell" width="25%">
                                                     تحليل قطاع عمل العميل
                                                 </td>
                                                 <td width="75%">
-                                                    <t t-esc="doc.analyse_secteur_act"/>
+                                                    <t t-esc="step_2.analyse_secteur_act"/>
                                                 </td>
                                             </tr>
-                                            <tr t-if="doc.ampleur_benefice">
+                                            <tr t-if="step_2.ampleur_benefice">
                                                 <td class="title-cell" width="25%">
                                                     حجم الارباح PNB المتوقعة
                                                 </td>
                                                 <td width="75%">
-                                                    <t t-esc="doc.ampleur_benefice"/>
+                                                    <t t-esc="step_2.ampleur_benefice"/>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -1211,7 +1259,7 @@
                                 </div>
                                 <br/>
                                 <div class="table_deco">
-                                    <table class="reversed-table" t-if="doc.facitlite_existante">
+                                    <table class="reversed-table" t-if="step_2.facitlite_existante">
                                         <thead>
                                             <tr>
                                                 <th colspan="5" class="title-cell">
@@ -1227,7 +1275,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <t t-foreach="doc.facitlite_existante" t-as="line">
+                                            <t t-foreach="step_2.facitlite_existante" t-as="line">
                                                 <tr>
                                                     <td>
                                                         <t t-esc="line.company"/>
@@ -1277,11 +1325,11 @@
                                     <t t-else="">
                                         <t t-set="col_value" t-value="2"/>
                                     </t>-->
-                                    <table class="reversed-table" t-if="doc.bilan_id">
+                                    <table class="reversed-table" t-if="step_2.bilan_id">
                                         <t t-set="bilan1_year"
-                                           t-value="doc.bilan_id.filtered(lambda l:l.sequence == 0)"/>
+                                           t-value="step_2.bilan_id.filtered(lambda l:l.sequence == 0)"/>
                                         <t t-set="bilan1_lines"
-                                           t-value="doc.bilan_id.filtered(lambda l:l.sequence != 0)"/>
+                                           t-value="step_2.bilan_id.filtered(lambda l:l.sequence != 0)"/>
 
                                         <thead>
                                             <tr>
@@ -1363,7 +1411,7 @@
                                             <tr>
                                                 <td style="border: 1px solid #808080;">
                                                     <ol>
-                                                        <t t-foreach="doc.strength_ids" t-as="line">
+                                                        <t t-foreach="step_2.strength_ids" t-as="line">
                                                             <li>
                                                                 <t t-esc="line.name"/>
                                                             </li>
@@ -1372,7 +1420,7 @@
                                                 </td>
                                                 <td style="border: 1px solid #808080;">
                                                     <ol>
-                                                        <t t-foreach="doc.weakness_ids" t-as="line">
+                                                        <t t-foreach="step_2.weakness_ids" t-as="line">
                                                             <li>
                                                                 <t t-esc="line.name"/>
                                                             </li>
@@ -1393,7 +1441,7 @@
                                             <tr>
                                                 <td style="border: 1px solid #808080;">
                                                     <ol>
-                                                        <t t-foreach="doc.threat_ids" t-as="line">
+                                                        <t t-foreach="step_2.threat_ids" t-as="line">
                                                             <li>
                                                                 <t t-esc="line.name"/>
                                                             </li>
@@ -1402,7 +1450,7 @@
                                                 </td>
                                                 <td style="border: 1px solid #808080;">
                                                     <ol>
-                                                        <t t-foreach="doc.opportunitie_ids" t-as="line">
+                                                        <t t-foreach="step_2.opportunitie_ids" t-as="line">
                                                             <li>
                                                                 <t t-esc="line.name"/>
                                                             </li>
@@ -1415,7 +1463,7 @@
                                 </div>
                                 <br/>
                                 <div class="table_deco">
-                                    <table class="reversed-table" t-if="doc.facilite_propose">
+                                    <table class="reversed-table" t-if="step_2.facilite_propose">
                                         <thead>
                                             <tr>
                                                 <th colspan="5" class="title-cell">التسهيلات المقترحة</th>
@@ -1429,7 +1477,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <t t-foreach="doc.facilite_propose" t-as="line">
+                                            <t t-foreach="step_2.facilite_propose" t-as="line">
                                                 <tr>
                                                     <td>
                                                         <t t-foreach="line.type_demande_ids" t-as="demande">
@@ -1460,7 +1508,7 @@
                                 </div>
                                 <br/>
                                 <div class="table_deco">
-                                    <table class="reversed-table" t-if="doc.garantie_ids">
+                                    <table class="reversed-table" t-if="step_2.garantie_ids">
                                         <thead>
                                             <tr>
                                                 <th colspan="7" style="text-align: center" class="title-cell">
@@ -1472,7 +1520,7 @@
                                             <tr>
                                                 <td>
                                                     <ul>
-                                                        <t t-foreach="doc.garantie_ids" t-as="line">
+                                                        <t t-foreach="step_2.garantie_ids" t-as="line">
                                                             <li>
                                                                 <t t-esc="line.name"/>
                                                             </li>
@@ -1485,7 +1533,7 @@
                                 </div>
                                 <br/>
                                 <div class="table_deco">
-                                    <table class="reversed-table" t-if="doc.recommendation_agence">
+                                    <table class="reversed-table" t-if="step_1.recommendation_agence">
                                         <thead>
                                             <tr>
                                                 <th style="text-align: center" class="title-cell">
@@ -1496,7 +1544,7 @@
                                         <tbody>
                                             <tr>
                                                 <td>
-                                                    <t t-esc="doc.recommendation_agence"/>
+                                                    <t t-esc="step_1.recommendation_agence"/>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -1504,7 +1552,7 @@
                                 </div>
                                 <br/>
                                 <div class="table_deco">
-                                    <table class="reversed-table" t-if="doc.recommendation_1">
+                                    <table class="reversed-table" t-if="step_2recommendation_1">
                                         <thead>
                                             <tr>
                                                 <th style="text-align: center" class="title-cell">
@@ -1515,7 +1563,7 @@
                                         <tbody>
                                             <tr>
                                                 <td>
-                                                    <t t-esc="doc.recommendation_1"/>
+                                                    <t t-esc="step_2.recommendation_1"/>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -1527,7 +1575,7 @@
                                         <thead>
                                             <tr>
                                                 <th style="text-align: center" class="title-cell">
-                                                    توصية مدير  إدارة  الدراسات الائتمانية للمؤسسات
+                                                    توصية مدير إدارة الدراسات الائتمانية للمؤسسات
                                                 </th>
                                             </tr>
                                         </thead>
@@ -1546,7 +1594,7 @@
                                         <thead>
                                             <tr>
                                                 <th style="text-align: center" class="title-cell">
-                                                    توصية رئيس  خلية إدارة المخاطر
+                                                    توصية رئيس خلية إدارة المخاطر
                                                 </th>
                                             </tr>
                                         </thead>
@@ -1565,7 +1613,7 @@
                                         <thead>
                                             <tr>
                                                 <th style="text-align: center" class="title-cell">
-                                                    توصية رئيس قطاع  الخزينة و العمليات المحلية و الدولية
+                                                    توصية رئيس قطاع الخزينة و العمليات المحلية و الدولية
                                                 </th>
                                             </tr>
                                         </thead>

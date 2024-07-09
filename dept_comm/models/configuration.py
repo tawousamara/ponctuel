@@ -21,7 +21,7 @@ class KycDetail(models.Model):
 class Partenaire(models.Model):
     _inherit = 'wk.partenaire'
     _description = 'Partenaire du client'
-
+    
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
 
@@ -29,18 +29,18 @@ class Partenaire(models.Model):
 class EquipeGestion(models.Model):
     _inherit = 'wk.gestion'
     _description = 'Equipe de gestion'
-
+    
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-
-
+    
+    
 class Taillefin(models.Model):
     _inherit = 'wk.taille'
     _description = 'La taille et la structure du financement requis'
-
+    
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-
+    
 
 class SituationBancaire(models.Model):
     _inherit = 'wk.situation'
@@ -49,14 +49,13 @@ class SituationBancaire(models.Model):
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
 
-
 class SituationFinanciere(models.Model):
     _inherit = 'wk.situation.fin'
     _description = 'Situation financière'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-
+    
 
 class Fournisseur(models.Model):
     _inherit = 'wk.fournisseur'
@@ -64,7 +63,7 @@ class Fournisseur(models.Model):
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-
+    
 
 class Client(models.Model):
     _inherit = 'wk.client'
@@ -80,7 +79,7 @@ class Companies(models.Model):
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-
+    
 
 class FaciliteAccorde(models.Model):
     _inherit = 'wk.facilite.accorde'
@@ -88,7 +87,7 @@ class FaciliteAccorde(models.Model):
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-
+    
 
 class Detail(models.Model):
     _inherit = 'wk.detail.garantie'
@@ -96,7 +95,7 @@ class Detail(models.Model):
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-
+    
 
 class DetailGarantiePropose(models.Model):
     _inherit = 'wk.detail.garantie.propose'
@@ -104,28 +103,28 @@ class DetailGarantiePropose(models.Model):
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-
+    
 
 class Ganrantie(models.Model):
     _inherit = 'wk.garantie.conf'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-
-
+    
+    
 class GanrantieFin(models.Model):
     _inherit = 'wk.garantie.fin'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-
+    
 
 class GanrantieAutre(models.Model):
     _inherit = 'wk.garantie.autres'
-
+    
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
-
+    
 
 class Risque(models.Model):
     _inherit = 'wk.risque.line'
@@ -181,12 +180,30 @@ class TCR(models.Model):
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
 
+    @api.model
+    def create(self, vals):
+        if 'step_id' in self.env.context:
+            vals['step_id'] = self.env.context.get('step_id')
+        res = super(TCR, self).create(vals)
+        if res.step_id:
+            res.step_id.tcr_id = res.id
+        return res
+
 
 class Passif(models.Model):
     _inherit = 'import.ocr.passif'
 
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
+
+    @api.model
+    def create(self, vals):
+        if 'step_id' in self.env.context:
+            vals['step_id'] = self.env.context.get('step_id')
+        res = super(Passif, self).create(vals)
+        if res.step_id:
+            res.step_id.passif_id = res.id
+        return res
 
 
 class Actif(models.Model):
@@ -195,9 +212,80 @@ class Actif(models.Model):
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
     step_id = fields.Many2one('wk.etape.ponctuel')
 
+    @api.model
+    def create(self, vals):
+        if 'step_id' in self.env.context:
+            vals['step_id'] = self.env.context.get('step_id')
+        res = super(Actif, self).create(vals)
+        if res.step_id:
+            res.step_id.actif_id = res.id
+        return res
 
 class BilanFisc(models.Model):
     _inherit = 'wk.bilan'
+    _description = 'Bilan fiscal'
+    _order = 'sequence,id'
+
+    ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
+    @api.model
+    def create(self, vals):
+        res = super(BilanFisc, self).create(vals)
+        if 'bilan_id' in vals:
+            vals.pop('bilan_id')
+        if 'step_id' in vals:
+            vals['bilan'] = res.id
+            if res.categorie == '1':
+                self.env['wk.bilan.cat1'].create(vals)
+            if res.categorie == '2':
+                self.env['wk.bilan.cat2'].create(vals)
+            if res.categorie == '3':
+                self.env['wk.bilan.cat3'].create(vals)
+            if res.categorie == '4':
+                self.env['wk.bilan.cat4'].create(vals)
+            if res.categorie == '5':
+                self.env['wk.bilan.cat5'].create(vals)
+        return res
+
+
+class BilanFisc1(models.Model):
+    _inherit = 'wk.bilan.cat1'
+    _description = 'Bilan fiscal'
+    _order = 'sequence,id'
+
+    ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
+
+
+class BilanFisc2(models.Model):
+    _inherit = 'wk.bilan.cat2'
+    _description = 'Bilan fiscal'
+    _order = 'sequence,id'
+
+    ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
+
+
+class BilanFisc3(models.Model):
+    _inherit = 'wk.bilan.cat3'
+    _description = 'Bilan fiscal'
+    _order = 'sequence,id'
+
+    ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
+
+
+class BilanFisc4(models.Model):
+    _inherit = 'wk.bilan.cat4'
+    _description = 'Bilan fiscal'
+    _order = 'sequence,id'
+
+    ponctuel_id = fields.Many2one('wk.workflow.ponctuel')
+    step_id = fields.Many2one('wk.etape.ponctuel')
+
+
+class BilanFisc5(models.Model):
+    _inherit = 'wk.bilan.cat5'
     _description = 'Bilan fiscal'
     _order = 'sequence,id'
 
@@ -277,8 +365,7 @@ class Tracking(models.Model):
     step_id = fields.Many2one('wk.etape.ponctuel')
     date_debut = fields.Date(string='تاريخ البدء')
     date_fin = fields.Date(string='تاريخ الانتهاء')
-    date_difference = fields.Char(
-        string='الوقت المستغرق', compute='_compute_date')
+    date_difference = fields.Char(string='الوقت المستغرق', compute='_compute_date')
     state = fields.Selection([('1', 'الفرع'),
                               ('2', 'إدارة الاعمال التجارية'),
                               ('3', 'إدارة  الدراسات الائتمانية للمؤسسات'),
@@ -296,8 +383,7 @@ class Tracking(models.Model):
     is_revision = fields.Boolean()
     time = fields.Integer(string='الاجال', related='time_id.time')
     difference = fields.Integer(string='الاجال', )
-    time_id = fields.Many2one(
-        'wk.time', string='الاجال', compute='compute_time')
+    time_id = fields.Many2one('wk.time', string='الاجال', compute='compute_time')
     depasse = fields.Boolean(string='depasse')
 
     def _compute_date(self):
@@ -343,3 +429,4 @@ class PlanCharge(models.Model):
     besoin = fields.Float(string='الاحتياجات التمويلية')
     ponctuel_id = fields.Many2one('wk.workflow.ponctuel',
                                   string='Ponctuel')
+
