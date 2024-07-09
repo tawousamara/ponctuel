@@ -181,6 +181,25 @@ class ApiController(http.Controller):
             client_data.append(element)
 
         dossier_data = {
+            #Champs bruts
+            'classification': step1.classification.name if step1.classification else '',
+            'adress_siege': step1.adress_siege if step1.adress_siege else '',
+            'nif': step1.nif if step1.nif else '',
+            'num_registre_commerce': step1.num_registre_commerce if step1.num_registre_commerce else '',
+            'date_ouverture_compte': step1.date_ouverture_compte if step1.date_ouverture_compte else '',
+            'date_inscription': step1.date_inscription if step1.date_inscription else '',
+            'date_debut_activite': step1.date_debut_activite if step1.date_debut_activite else '',
+            'activite': step1.activite.name if step1.activite else '',
+            'activite_second': step1.activite_second.name if step1.activite_second else '',
+            'activite_sec': step1.activite_sec if step1.activite_sec else '',
+            'activity_code': step1.activity_code if step1.activity_code else '',
+            'activity_description': step1.activity_description if step1.activity_description else '',
+            'phone': step1.phone if step1.phone else '',
+            'email': step1.email if step1.email else '',
+            'siteweb': step1.siteweb if step1.siteweb else '',
+            'gerant': step1.gerant.name if step1.gerant else '',
+
+            #Champs One2many
             'facilite_accorde': facilite_accorde_data if step1.facilite_accorde else [],
             'apropos': apropos_data if step1.apropos else [],
             'kyc': kyc_data if step1.kyc else [],
