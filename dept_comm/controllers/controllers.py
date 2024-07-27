@@ -56,6 +56,98 @@ class ApiController(http.Controller):
         }
         return Response(json.dumps({'data': dossier_data}), status=200, headers={'Content-Type': 'application/json'})
 
+    @http.route('/api/v1/get_detail', auth='public', type='json', methods=['POST'], cors='*')
+    def get_dossier(self, **kw):
+        request_body = request.httprequest.data.decode('utf-8')
+        data = json.loads(request_body)
+        dossier_id = data.get('dossier_id')
+
+        if not dossier_id:
+            return Response(json.dumps({'error': 'Dossier ID not provided'}), status=400,
+                            headers={'Content-Type': 'application/json'})
+
+        dossier = request.env['wk.workflow.ponctuel'].sudo().browse(dossier_id)
+
+        if not dossier.exists():
+            return Response(json.dumps({'error': 'Dossier not found'}), status=404,
+                            headers={'Content-Type': 'application/json'})
+
+        step1 = dossier.states.filtered(lambda l: l.sequence == 1)
+        facilite_accorde_data = []
+        for item in step1.facilite_accorde:
+            demande_ids = ''
+            if len(item.type_demande_ids) != 1:
+                for line in item.type_demande_ids:
+                    demande_ids += line.name + ' / '
+            else:
+                for line in item.type_demande_ids:
+                    demande_ids += line.name
+            element = {
+                # نوع التسهيلات
+                'type_demande_ids': demande_ids,
+                # تاريخ الرخصة
+                'date': item.date,
+                # الحالي
+                'montant_acctual': item.montant_da_actuel,
+                # المطلوبة
+                'montant_demande': item.montant_da_demande,
+                # الاجمالي الصافي
+                'total': item.montant_da_total,
+                # التأمين النقدي
+                'percent': item.garantie_montant,
+            }
+            facilite_accorde_data.append(element)
+
+        step2 = dossier.states.filtered(lambda l: l.sequence == 2)
+        donnee_financiere = {}
+        # حقوق الملكية
+        droit = step2.bilan_id.filtered(lambda l: l.sequence == 1)
+        donnee_financiere["rights"] = {
+            'name': 'حقوق الملكية',
+            '2023': droit.year_3,
+            '2024': droit.year_4,
+        }
+        # رأس المال
+        capital = step2.bilan_id.filtered(lambda l: l.sequence == 2)
+        donnee_financiere["capital"] = {
+            'name': 'رأس المال',
+            '2023': capital.year_3,
+            '2024': capital.year_4,
+        }
+        # احتياجات رأس المال العامل
+        bfr = step2.bilan_id.filtered(lambda l: l.sequence == 11)
+        donnee_financiere["rights_active"] = {
+            'name': 'احتياجات رأس المال العامل',
+            '2023': bfr.year_3,
+            '2024': bfr.year_4,
+        }
+        # صافي الارباح
+        benifice = step2.bilan_id.filtered(lambda l: l.sequence == 23)
+        donnee_financiere["profit"] = {
+            'name': 'صافي الارباح',
+            '2023': benifice.year_3,
+            '2024': benifice.year_4,
+        }
+        # EBITDA
+        ebitda = step2.bilan_id.filtered(lambda l: l.sequence == 22)
+        donnee_financiere["EBITDA"] = {
+            'name': 'EBITDA',
+            '2023': ebitda.year_3,
+            '2024': ebitda.year_4,
+        }
+
+        dossier_data = {
+            #الراس المال الحالي
+            'dossier_id': dossier.id,
+            'capital': dossier.nom_client.chiffre_affaire if dossier.nom_client else '',
+            # تفاصيل التسهيلات الممنوحة
+            'tableau_bord': facilite_accorde_data if step1.facilite_accorde else [],
+            #tableau bilan
+            'detail_finance': donnee_financiere,
+            'rank': dossier.risk_scoring.resultat_scoring if dossier.risk_scoring else 0
+        }
+        return Response(json.dumps({'data': dossier_data}), status=200, headers={'Content-Type': 'application/json'})
+
     @http.route('/api/v1/get_tables', auth='public', type='json', methods=['POST'], cors='*')
     def get_tables(self, **kw):
         request_body = request.httprequest.data.decode('utf-8')
@@ -433,102 +525,3 @@ class ApiController(http.Controller):
 
         }
         return Response(json.dumps({'data': dossier_data}), status=200, headers={'Content-Type': 'application/json'})
-
-    @http.route('/api/v1/get_detail', auth='public', type='json', methods=['POST'], cors='*')
-    def get_dossier(self, **kw):
-        request_body = request.httprequest.data.decode('utf-8')
-        data = json.loads(request_body)
-        dossier_id = data.get('dossier_id')
-
-        if not dossier_id:
-            return Response(json.dumps({'error': 'Dossier ID not provided'}), status=400,
-                            headers={'Content-Type': 'application/json'})
-
-        dossier = request.env['wk.workflow.ponctuel'].sudo().browse(dossier_id)
-
-        if not dossier.exists():
-            return Response(json.dumps({'error': 'Dossier not found'}), status=404,
-                            headers={'Content-Type': 'application/json'})
-
-        step1 = dossier.states.filtered(lambda l: l.sequence == 1)
-        facilite_accorde_data = []
-        for item in step1.facilite_accorde:
-            demande_ids = ''
-            if len(item.type_demande_ids) != 1:
-                for line in item.type_demande_ids:
-                    demande_ids += line.name + ' / '
-            else:
-                for line in item.type_demande_ids:
-                    demande_ids += line.name
-            element = {
-                # نوع التسهيلات
-                'type_demande_ids': demande_ids,
-                # تاريخ الرخصة
-                'date': item.date,
-                # الحالي
-                'montant_da_actuel': item.montant_da_actuel,
-                # المطلوبة
-                'montant_da_demande': item.montant_da_demande,
-                # الاجمالي الصافي
-                'montant_da_total': item.montant_da_total,
-                # التأمين النقدي
-                'garantie_montant': item.garantie_montant,
-            }
-            facilite_accorde_data.append(element)
-
-        step2 = dossier.states.filtered(lambda l: l.sequence == 2)
-        # حقوق الملكية
-        droit = step2.bilan_id.filtered(lambda l:l.sequence == 1)
-        donnee_1 = {
-            'name': 'حقوق الملكية',
-            'year_1': droit.year_3,
-            'year_2': droit.year_4,
-        }
-        # رأس المال
-        capital = step2.bilan_id.filtered(lambda l:l.sequence == 2)
-        donnee_2 = {
-            'name': 'رأس المال',
-            'year_1': capital.year_3,
-            'year_2': capital.year_4,
-        }
-        # احتياجات رأس المال العامل
-        bfr = step2.bilan_id.filtered(lambda l:l.sequence == 11)
-        donnee_3 = {
-            'name': 'احتياجات رأس المال العامل',
-            'year_1': bfr.year_3,
-            'year_2': bfr.year_4,
-        }
-        # صافي الارباح
-        benifice = step2.bilan_id.filtered(lambda l:l.sequence == 23)
-        donnee_4 = {
-            'name': 'صافي الارباح',
-            'year_1': benifice.year_3,
-            'year_2': benifice.year_4,
-        }
-        # EBITDA
-        ebitda = step2.bilan_id.filtered(lambda l:l.sequence == 22)
-        donnee_5 = {
-            'name': 'EBITDA',
-            'year_1': ebitda.year_3,
-            'year_2': ebitda.year_4,
-        }
-
-        dossier_data = {
-            #الراس المال الحالي
-            'capital': dossier.nom_client.chiffre_affaire if dossier.nom_client else '',
-            # تفاصيل التسهيلات الممنوحة
-            'facilite_accorde': facilite_accorde_data if step1.facilite_accorde else [],
-            #tableau bilan
-            'donnee_1': donnee_1,
-            'donnee_2': donnee_2,
-            'donnee_3': donnee_3,
-            'donnee_4': donnee_4,
-            'donnee_5': donnee_5,
-            # التنقيط
-            'scoring': dossier.risk_scoring.resultat_scoring if dossier.risk_scoring else 0,
-
-
-
-        }
-        return Response(json.dumps({'data': dossier_data}), status=200, headers={'Content-Type': 'application/json'})
-
