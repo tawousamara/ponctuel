@@ -37,10 +37,20 @@ class ApiController(http.Controller):
 
         dossier_data = {
             'capital': dossier.nom_client.chiffre_affaire if dossier.nom_client else '',
+            'client': dossier.nom_client.name if dossier.nom_client else '',
             'num_compte': dossier.num_compte or '',
             'num_registre_commerce': dossier.num_registre_commerce or '',
-            'demande': dossier.demande.name if dossier.demande else '',
             'explanation': dossier.explanation or '',
+            # الطلب
+            'demande': dossier.demande.name or '',
+            # تاريخ الإنشاء
+            'date': dossier.date.strtime('%y-%m-%d'),
+            # الفرع
+            'branche': dossier.branche.ref if dossier.branche else '',
+            # تصنيف الشركة
+            'classification': dossier.nom_client.classification.name if dossier.nom_client.classification else '',
+            # عنوان المقر الاجتماعي
+            'adress_siege': dossier.nom_client.adress_siege if dossier.nom_client.adress_siege else '',
             'avis_conseil': dossier.avis_conseil or '',
             'recommendation_agence': dossier.recommendation_agence or '',
             'recommendation_1': dossier.recommendation_1 or '',
