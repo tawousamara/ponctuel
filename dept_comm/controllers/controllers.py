@@ -21,7 +21,7 @@ class ApiController(http.Controller):
             })
         return Response(json.dumps({'data': data}), status=200, headers={'Content-Type': 'application/json'})
 
-    @http.route('/api/v1/get_dossier', auth='public', type='json', methods=['POST'], cors='*')
+    @http.route('/api/v1/get_dossier', auth='public', type='http', methods=['POST'], cors='*', csrf=False)
     def get_dossier(self, **kw):
         request_body = request.httprequest.data.decode('utf-8')
         data = json.loads(request_body)
@@ -52,12 +52,11 @@ class ApiController(http.Controller):
             'recommendation_7': dossier.recommendation_7 or '',
             'recommendation_8': dossier.recommendation_8 or '',
             'recommendation_9': dossier.recommendation_9 or '',
-            'recommendation_10': dossier.recommendation_10 or '',
         }
         return Response(json.dumps({'data': dossier_data}), status=200, headers={'Content-Type': 'application/json'})
 
-    @http.route('/api/v1/get_detail', auth='public', type='json', methods=['POST'], cors='*')
-    def get_dossier(self, **kw):
+    @http.route('/api/v1/get_detail', auth='public', type='http', methods=['POST'], cors='*', csrf=False)
+    def get_dossier_details(self, **kw):
         request_body = request.httprequest.data.decode('utf-8')
         data = json.loads(request_body)
         dossier_id = data.get('dossier_id')
@@ -86,7 +85,7 @@ class ApiController(http.Controller):
                 # نوع التسهيلات
                 'type_demande_ids': demande_ids,
                 # تاريخ الرخصة
-                'date': item.date,
+                'date': item.date.strtime('%y-%m-%d'),
                 # الحالي
                 'montant_acctual': item.montant_da_actuel,
                 # المطلوبة
@@ -137,12 +136,12 @@ class ApiController(http.Controller):
         }
 
         dossier_data = {
-            #الراس المال الحالي
+            # الراس المال الحالي
             'dossier_id': dossier.id,
             'capital': dossier.nom_client.chiffre_affaire if dossier.nom_client else '',
             # تفاصيل التسهيلات الممنوحة
             'tableau_bord': facilite_accorde_data if step1.facilite_accorde else [],
-            #tableau bilan
+            # tableau bilan
             'detail_finance': donnee_financiere,
             'rank': dossier.risk_scoring.resultat_scoring if dossier.risk_scoring else 0
         }
@@ -164,9 +163,9 @@ class ApiController(http.Controller):
         if not dossier.states:
             return Response(json.dumps({'error': 'No steps found'}), status=404,
                             headers={'Content-Type': 'application/json'})
-        step1 = dossier.states.filtered(lambda l:l.sequence == 1)
+        step1 = dossier.states.filtered(lambda l: l.sequence == 1)
         '''الفرع'''
-        #تفاصيل التسهيلات الممنوحة (KDA)
+        # تفاصيل التسهيلات الممنوحة (KDA)
         facilite_accorde_data = []
         for item in step1.facilite_accorde:
             demande_ids = ''
@@ -180,7 +179,7 @@ class ApiController(http.Controller):
                 # نوع التسهيلات
                 'type_demande_ids': demande_ids,
                 # تاريخ الرخصة
-                'date': item.date,
+                'date': item.date.strtime('%y-%m-%d'),
                 # الحالي
                 'montant_da_actuel': item.montant_da_actuel,
                 # المطلوبة
@@ -194,14 +193,14 @@ class ApiController(http.Controller):
             }
             facilite_accorde_data.append(element)
 
-        #توزيع راس مال الشركة
+        # توزيع راس مال الشركة
         apropos_data = []
         for item in step1.apropos:
             element = {
                 # اسم الشريك/المالك
                 'nom_partenaire': item.nom_partenaire,
                 # تاريخ التاسيس/الميلاد
-                'age': item.age,
+                'age': item.age.strtime('%y-%m-%d'),
                 # صفة الشريك
                 'statut_partenaire': item.statut_partenaire,
                 # الجنسية
@@ -240,7 +239,7 @@ class ApiController(http.Controller):
                 # المستوى الدراسي
                 'niveau_etude': item.niveau_etude,
                 # السن
-                'age': item.age,
+                'age': item.age.strtime('%y-%m-%d'),
                 # الخبرة المهنية
                 'experience': item.experience
             }
@@ -303,7 +302,7 @@ class ApiController(http.Controller):
             }
             client_data.append(element)
 
-        step2 = dossier.states.filtered(lambda l:l.sequence == 2)
+        step2 = dossier.states.filtered(lambda l: l.sequence == 2)
         '''مديرية الاعمال التجارية'''
 
         # تفاصيل الضمانات
@@ -325,7 +324,7 @@ class ApiController(http.Controller):
                 # القيمة
                 'montant': item.montant,
                 # تاريخ التقييم
-                'date': item.date,
+                'date': item.date.strtime('%y-%m-%d'),
                 # التغطية
                 'recouvrement': item.recouvrement,
                 # كفاية الضمانات قابلية التنفيذ عليها
@@ -351,7 +350,7 @@ class ApiController(http.Controller):
                 # القيمة
                 'montant': item.montant,
                 # تاريخ التقييم
-                'date': item.date,
+                'date': item.date.strtime('%y-%m-%d'),
                 # التغطية
                 'recouvrement': item.recouvrement,
                 # كفاية الضمانات قابلية التنفيذ عليها
@@ -462,21 +461,21 @@ class ApiController(http.Controller):
                 # الصافي الحالي
                 'net_da': item.net_da,
                 # الضمانات
-                'garanties' : item.garanties
+                'garanties': item.garanties
             }
             facitlite_existante_data.append(element)
 
         dossier_data = {
-            #Champs bruts
+            # Champs bruts
             # الغرض من الطلب
             'explanation': dossier.explanation if dossier.explanation else '',
             # الطلب
             'demande': dossier.demande.name if dossier.demande else '',
             # الفرع
             'branche': dossier.branche.ref if dossier.branche else '',
-            #تصنيف الشركة
+            # تصنيف الشركة
             'classification': step1.classification.name if step1.classification else '',
-            #عنوان المقر الاجتماعي
+            # عنوان المقر الاجتماعي
             'adress_siege': step1.adress_siege if step1.adress_siege else '',
             # NIF
             'nif': step1.nif if step1.nif else '',
@@ -507,7 +506,7 @@ class ApiController(http.Controller):
             # المسير
             'gerant': step1.gerant.name if step1.gerant else '',
 
-            #Champs One2many
+            # Champs One2many
             'facilite_accorde': facilite_accorde_data if step1.facilite_accorde else [],
             'apropos': apropos_data if step1.apropos else [],
             'kyc': kyc_data if step1.kyc else [],
