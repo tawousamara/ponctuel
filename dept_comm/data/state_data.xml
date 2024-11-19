@@ -2,12 +2,43 @@
 <odoo>
     <data>
         <record id="principe_1" model="wk.state.ponctuel">
-            <field name="name">الفرع</field>
+            <field name="name"> الفرع </field>
             <field name="sequence">1</field>
         </record>
         <record id="principe_2" model="wk.state.ponctuel">
-            <field name="name">مديرية الاعمال التجارية</field>
+            <field name="name">الاعمال التجارية </field>
             <field name="sequence">2</field>
+        </record>
+        <record id="principe_6" model="wk.state.ponctuel">
+            <field name="name"> مدير الدراسات الائتماني  </field>
+            <field name="sequence">3</field>
+        </record>
+        <!-- Comite 2 -->
+        <record id="comite2_state_2" model="wk.state.ponctuel">
+            <field name="name">رئيس خلية ادارة التمويلات</field>
+            <field name="sequence">4</field>
+        </record>
+        <record id="principe_3" model="wk.state.ponctuel">
+            <field name="name">  رئيس قطاع الخزينة  </field>
+            <field name="sequence">5</field>
+        </record>
+        <record id="principe_4" model="wk.state.ponctuel">
+            <field name="name"> رئيس خلية ادارة المخاطر   </field>
+            <field name="sequence">6</field>
+        </record>
+        <!-- Comité 2 States -->
+        <record id="comite2_state_5" model="wk.state.ponctuel">
+            <field name="name">مستشار نائب المدير العام المكلف بالاستشراف التجاري</field>
+            <field name="sequence">7</field>
+        </record>
+        <record id="principe_5" model="wk.state.ponctuel">
+            <field name="name"> نائب المدير العام  </field>
+            <field name="sequence">8</field>
+        </record>
+        <!-- Comité 2 States -->
+        <record id="comite2_state_7" model="wk.state.ponctuel">
+            <field name="name"> المدير العام</field>
+            <field name="sequence">9</field>
         </record>
     </data>
 </odoo>

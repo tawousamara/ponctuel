@@ -179,17 +179,21 @@ class Ponctuel(models.Model):
     date_fin = fields.Date(string='تاريخ الانتهاء')
     name = fields.Char(string='Réference')
     state = fields.Selection([('1', 'الفرع'),
-                              ('2', 'إدارة الاعمال التجارية'),
-                              ('3', 'إدارة  الدراسات الائتمانية للمؤسسات'),
-                              ('4', 'خلية إدارة المخاطر'),
-                              ('5', 'قطاع  الخزينة و العمليات المحلية و الدولية'),
-                              ('6', 'خلية إدارة التمويلات'),
-                              ('7', 'مستشار نائب المدير العام المكلف بالاستشراف التجاري'),
-                              ('8', 'خلية التحصيل الودي و الجبري'),
-                              ('9', 'نائب المدير العام'),
-                              ('10', 'لجنة التسهيلات'),
-                              ('11', 'طور تبليغ المتعامل'),
+                                ('2', 'الاعمال التجارية'),
+                                ('3', 'مدير الدراسات الائتماني '),
+                                ('4', 'رئيس خلية ادارة التمويلات'),
+                                ('5', 'رئيس قطاع الخزينة ' ),
+                                ('6', 'رئيس خلية ادارة المخاطر '),
+                                ('7', 'مستشار نائب المدير العام المكلف بالاستشراف التجاري'),
+                                ('8', 'نائب المدير العام'),
+                                ('9', 'المدير العام'),
+                                ('10','طور تبليغ المتعامل'),
                               ], default='1', string='وضعية الملف')
+    comite_type = fields.Selection(
+        [('comite_1', 'لجنة مصغرة'), ('comite_2', ' لجنة موسعة')],
+        string="نوع اللجنة",
+        required=True
+    )
     #demande = fields.Many2one('wk.type.demande', string='الطلب', required=True)
     company_id = fields.Many2one('res.company', default=lambda self: self.env.company)
     raison_refus = fields.Text(string='سبب طلب المراجعة')
@@ -349,7 +353,7 @@ class Ponctuel(models.Model):
     recommendation_6 = fields.Text(string='توصية مستشار نائب المدير العام المكلف بالاستشراف التجاري')
     recommendation_7 = fields.Text(string='توصية رئيس خلية التحصيل الودي و الجبري')
     recommendation_8 = fields.Text(string='توصية نائب المدير العام')
-    recommendation_9 = fields.Text(string='قرار لجنة التسهيلات')
+    recommendation_9 = fields.Text(string='توصية المدير العام ')
 
     def compute_visible_states(self):
         for rec in self:
@@ -683,21 +687,40 @@ class Ponctuel(models.Model):
             }
 
     def validate_information_function(self):
+        comite_state_map = {
+            'comite_1': ['1', '2', '3', '5', '6', '8', '10'],
+            'comite_2': ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+        }
         for rec in self:
-            last_state = int(rec.state)
-            actuel_state = int(rec.state) + 1
-            rec.state = str(actuel_state)
-            rec.raison_refus = False
-            last_track = self.env['wk.tracking.ponctuel'].search([('ponctuel_id', '=', rec.id),
-                                                                  ('state', '=', last_state)])
-            if last_track:
-                last_track.date_fin = fields.Date.today()
-            self.env['wk.tracking.ponctuel'].create({'ponctuel_id': rec.id,
-                                            'state': rec.state,
-                                            'date_debut': fields.Date.today(),
-                                            'is_revision': True if rec.raison_refus else False,
-                                            'comment': False})
-            if actuel_state == '11':
+            print('********************************************************')
+            print(rec.state)
+            state_path = comite_state_map.get(rec.comite_type, [])
+            current_state = rec.state
+            if current_state in state_path:
+                current_index = state_path.index(current_state)
+                if current_index < len(state_path) - 1:
+                    next_state = state_path[current_index + 1]
+                else:
+                    next_state = None
+            else:
+                next_state = None
+            if next_state:
+                rec.state = next_state
+                rec.raison_refus = False
+                last_track = self.env['wk.tracking.ponctuel'].search([
+                    ('ponctuel_id', '=', rec.id),
+                    ('state', '=', current_state)
+                ])
+                if last_track:
+                    last_track.date_fin = fields.Date.today()
+                self.env['wk.tracking.ponctuel'].create({
+                    'ponctuel_id': rec.id,
+                    'state': next_state,
+                    'date_debut': fields.Date.today(),
+                    'is_revision': rec.raison_refus,
+                    'comment': False
+                })
+            if next_state is None:
                 rec.date_fin = fields.Date.today()
 
     def a_revoir(self):
