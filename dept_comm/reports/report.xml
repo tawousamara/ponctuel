@@ -34,21 +34,15 @@
                 <table class="page-content" style="border: 1px black;border-collapse: collapse;">
                     <tbody>
                         <tr>
-                            <td width="60%"
-                                style="font-size: 20px;font-family: 'NotoArabic-Regular';padding: 5px; text-align: right;vertical-align: middle;">
+                            <td width="60%" style="font-size: 20px;font-family: 'NotoArabic-Regular';padding: 5px; text-align: right;vertical-align: middle;">
                                 ادارة النشاط التجاري
                             </td>
-                            <td width="30%"
-                                style="font-size: 20px;font-family: 'NotoArabic-Regular';padding: 5px; text-align: right;vertical-align: middle;">
+                            <td width="30%" style="font-size: 20px;font-family: 'NotoArabic-Regular';padding: 5px; text-align: right;vertical-align: middle;">
                                 التاريخ:
                                 <t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d')"/>
                             </td>
                             <td width="10%" rowspan="3">
-                                <img style="margin-bottom: 10px; width: 150px; height: 100px;"
-                                     t-if="doc.company_id.logo"
-                                     t-att-src="image_data_uri(doc.company_id.logo)" height="100"
-                                     border="1" width="100"
-                                     alt="Logo"/>
+                                <img style="margin-bottom: 10px; width: 150px; height: 100px;" t-if="doc.company_id.logo" t-att-src="image_data_uri(doc.company_id.logo)" height="100" border="1" width="100" alt="Logo"/>
                             </td>
                         </tr>
                         <tr>
@@ -182,25 +176,20 @@
                         <div class="page page-content">
                             <div class="justify-content-start">
                                 <table class="reversed-table">
-                                    <t t-set="step_1"
-                                       t-value="doc.states.filtered(lambda l: l.sequence == 1)"/>
+                                    <t t-set="step_1" t-value="doc.states.filtered(lambda l: l.sequence == 1)"/>
                                     <tbody>
                                         <tr>
-                                            <td style="font-family: 'NotoArabic-Regular';padding: 5px;vertical-align: middle;"
-                                                class="title-cell">
+                                            <td style="font-family: 'NotoArabic-Regular';padding: 5px;vertical-align: middle;" class="title-cell">
                                                 رقم التعريف الجبائي:
                                             </td>
-                                            <td colspan="3"
-                                                style="font-family: 'NotoArabic-Regular';padding: 5px;vertical-align: middle;">
+                                            <td colspan="3" style="font-family: 'NotoArabic-Regular';padding: 5px;vertical-align: middle;">
                                                 <t t-esc="step_1.nom_client.nif"/>
                                             </td>
-                                            <td class="title-cell"
-                                                style="font-family: 'NotoArabic-Regular';padding: 5px;vertical-align: middle;">
+                                            <td class="title-cell" style="font-family: 'NotoArabic-Regular';padding: 5px;vertical-align: middle;">
                                                 رقم السجل التجاري:
 
                                             </td>
-                                            <td colspan="5"
-                                                style="font-family: 'NotoArabic-Regular';padding: 5px;vertical-align: middle;">
+                                            <td colspan="5" style="font-family: 'NotoArabic-Regular';padding: 5px;vertical-align: middle;">
                                                 <t t-esc="step_1.nom_client.rc"/>
                                             </td>
                                         </tr>
@@ -267,7 +256,7 @@
                                                     <t t-esc="step_1.activity_code"/>
                                                 </td>
                                             </tr>
-                                            <tr>
+                                            <!-- <tr>
                                                 <td class="title-cell">
                                                     النشاط الثانوي
                                                 </td>
@@ -280,7 +269,7 @@
                                                 <td colspan="2">
                                                     <t t-esc="step_1.activite.name"/>
                                                 </td>
-                                            </tr>
+                                            </tr> -->
                                             <tr>
                                                 <td class="title-cell">
                                                     تاريخ القيد في السجل التجاري
@@ -329,48 +318,14 @@
                                                     <t t-esc="step_1.date_ouverture_compte"/>
                                                 </td>
                                             </tr>
-
                                             <tr>
                                                 <td class="title-cell">
                                                     الطلب
                                                 </td>
-                                                <td colspan="5" style="padding: 0px">
-                                                    <table class="reversed-table" style="margin:0px; border: none;"
-                                                           t-if="step_1.tailles">
-                                                        <thead>
-                                                            <tr>
-                                                                <th class="title-cell">نوع التسهيلات</th>
-                                                                <th class="title-cell">المبلغ المطلوب</th>
-                                                                <th class="title-cell">الغرض من التمويل</th>
-                                                                <th class="title-cell">هامش الجدية</th>
-                                                                <th class="title-cell">المدة (الايام)</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <t t-foreach="step_1.tailles" t-as="line">
-                                                                <tr>
-                                                                    <td>
-                                                                        <t t-esc="line.type_demande.name"/>
-                                                                    </td>
-                                                                    <td style="text-align: right; direction: ltr;">
-                                                                        <t t-esc="'{0:,.0f}'.format(line.montant / 1000)"/>
-                                                                    </td>
-                                                                    <td>
-                                                                        <t t-esc="line.raison"/>
-                                                                    </td>
-                                                                    <td>
-                                                                        <t t-esc="int(line.preg * 100)"/>%
-                                                                    </td>
-                                                                    <td>
-                                                                        <t t-esc="line.duree"/>
-                                                                    </td>
-                                                                </tr>
-                                                            </t>
-                                                        </tbody>
-                                                    </table>
+                                                <td colspan="5">
+                                                    طلب تمويل مؤقت
                                                 </td>
                                             </tr>
-
                                             <tr>
                                                 <td class="title-cell">
                                                     الغرض من الطلب
@@ -416,7 +371,8 @@
                                                         <t t-esc="line.nationalite.name"/>
                                                     </td>
                                                     <td>
-                                                        <t t-esc="int(line.pourcentage * 100)"/>%
+                                                        <t t-esc="int(line.pourcentage * 100)"/>
+%
                                                     </td>
                                                 </tr>
                                             </t>
@@ -425,7 +381,8 @@
                                                     الاجمالي
                                                 </td>
                                                 <td>
-                                                    <t t-esc="int(sum(step_1.apropos.mapped('pourcentage')) * 100)"/>%
+                                                    <t t-esc="int(sum(step_1.apropos.mapped('pourcentage')) * 100)"/>
+%
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -545,7 +502,8 @@
                                                         <t t-esc="line.date_debut"/>
                                                     </td>
                                                     <td style="text-align: right; direction: ltr;">
-                                                        <t t-esc="'{0:,.0f}'.format(line.niveau * 100)"/>%
+                                                        <t t-esc="'{0:,.0f}'.format(line.niveau * 100)"/>
+%
                                                     </td>
                                                     <td style="text-align: right; direction: ltr;">
                                                         <t t-esc="'{0:,.0f}'.format(line.besoin / 1000)"/>
@@ -595,10 +553,8 @@
                                 <!-- 3 ans البيانات المالية المدققة
                                 <div class="table_deco">
                                     <table class="reversed-table" t-if="doc.situations_fin">
-                                        <t t-set="situation_fin_year"
-                                           t-value="doc.situations_fin.filtered(lambda l:l.sequence == 0)"/>
-                                        <t t-set="situation_fin_lines"
-                                           t-value="etape1.situations_fin.filtered(lambda l:l.sequence != 0)"/>
+                                        <t t-set="situation_fin_year" t-value="doc.situations_fin.filtered(lambda l:l.sequence == 0)"/>
+                                        <t t-set="situation_fin_lines" t-value="etape1.situations_fin.filtered(lambda l:l.sequence != 0)"/>
                                         <thead>
                                             <tr>
                                                 <th colspan="4" style="text-align: center" class="title-cell">البيانات
@@ -682,7 +638,8 @@
                                                     <td>
                                                         <t t-foreach="line.type_demande_ids" t-as="demande">
                                                             <t t-if="len(line.type_demande_ids) != 1 and demande != line.type_demande_ids[-1]">
-                                                                <t t-esc="demande.name"/>/
+                                                                <t t-esc="demande.name"/>
+/
                                                             </t>
                                                             <t t-if="len(line.type_demande_ids) == 1 or demande == line.type_demande_ids[-1]">
                                                                 <t t-esc="demande.name"/>
@@ -715,16 +672,13 @@
                                 </div>
                                 <br/>
 
-                                <t t-set="step_2"
-                                   t-value="doc.states.filtered(lambda l: l.sequence == 2)"/>
+                                <t t-set="step_2" t-value="doc.states.filtered(lambda l: l.sequence == 2)"/>
                                 <!-- تفاصيل الضمانات -->
                                 <div class="table_deco">
-                                    <table class="reversed-table"
-                                           t-if="step_2.detail_garantie_actuel_ids or step_2.detail_garantie_propose_ids">
+                                    <table class="reversed-table" t-if="step_2.detail_garantie_actuel_ids or step_2.detail_garantie_propose_ids">
                                         <thead>
                                             <tr>
-                                                <th colspan="6" style="text-align: center; font-size: 17px"
-                                                    class="title-cell">
+                                                <th colspan="6" style="text-align: center; font-size: 17px" class="title-cell">
                                                     تفاصيل الضمانات
                                                 </th>
                                             </tr>
@@ -758,7 +712,8 @@
                                                         <t t-esc="line.date"/>
                                                     </td>
                                                     <td style="text-align: right; direction: ltr;">
-                                                        <t t-esc="int(line.recouvrement * 100)"/>%
+                                                        <t t-esc="int(line.recouvrement * 100)"/>
+%
                                                     </td>
                                                     <td>
                                                         <t t-if="line.niveau == '1'">
@@ -801,7 +756,8 @@
                                                         <t t-esc="line.date"/>
                                                     </td>
                                                     <td style="text-align: right; direction: ltr;">
-                                                        <t t-esc="int(line.recouvrement * 100)"/>%
+                                                        <t t-esc="int(line.recouvrement * 100)"/>
+%
                                                     </td>
                                                     <td>
                                                         <t t-if="line.niveau == '1'">
@@ -829,15 +785,12 @@
                                 </div>
                                 <br/>
                                 <!-- الشروط السابقة/المقترحة -->
-                                <t t-set="has_conf"
-                                   t-value="step_2.garantie_conf.filtered(lambda l:l.answer != False)"/>
+                                <t t-set="has_conf" t-value="step_2.garantie_conf.filtered(lambda l:l.answer != False)"/>
                                 <t t-set="has_fin" t-value="step_2.garantie_fin.filtered(lambda l:l.answer != False)"/>
-                                <t t-set="has_autre"
-                                   t-value="step_2.garantie_autres.filtered(lambda l:l.answer != False)"/>
+                                <t t-set="has_autre" t-value="step_2.garantie_autres.filtered(lambda l:l.answer != False)"/>
 
                                 <div class="table_deco">
-                                    <table class="reversed-table"
-                                           t-if="len(has_conf) != 0 or len(has_fin) != 0 or len(has_autre) != 0">
+                                    <table class="reversed-table" t-if="len(has_conf) != 0 or len(has_fin) != 0 or len(has_autre) != 0">
                                         <thead>
                                             <tr>
                                                 <th colspan="3" style="text-align: center" class="title-cell">
@@ -1006,10 +959,8 @@
                                                     مصرف السلام الجزائر (بالمليون
                                                     دج) -->
                                 <div class="table_deco">
-                                    <t t-set="year_mouvement"
-                                       t-value="step_2.mouvement.filtered(lambda l: l.sequence == 0)"/>
-                                    <t t-set="mouvement_lines"
-                                       t-value="step_2.mouvement.filtered(lambda l: l.sequence != 0)"/>
+                                    <t t-set="year_mouvement" t-value="step_2.mouvement.filtered(lambda l: l.sequence == 0)"/>
+                                    <t t-set="mouvement_lines" t-value="step_2.mouvement.filtered(lambda l: l.sequence != 0)"/>
                                     <table class="reversed-table" t-if="mouvement_lines">
                                         <thead>
                                             <tr>
@@ -1117,8 +1068,7 @@
                                                     الجبائية
                                                 </td>
                                                 <td style="padding: 0px" width="75%">
-                                                    <table class="reversed-table" t-if="step_2.position_tax"
-                                                           style="margin:0px; border: none; border-collapse: collapse;">
+                                                    <table class="reversed-table" t-if="step_2.position_tax" style="margin:0px; border: none; border-collapse: collapse;">
                                                         <thead>
                                                             <tr>
                                                                 <th/>
@@ -1157,8 +1107,7 @@
                                                     الموردين
                                                 </td>
                                                 <td style="padding: 0px" width="75%">
-                                                    <table class="reversed-table" t-if="step_1.fournisseur"
-                                                           style="margin:0px; border: none;">
+                                                    <table class="reversed-table" t-if="step_1.fournisseur" style="margin:0px; border: none;">
                                                         <thead>
                                                             <tr>
                                                                 <th class="title-cell" width="25%">الاسم</th>
@@ -1177,8 +1126,7 @@
                                                                     </td>
                                                                     <td width="50%">
                                                                         <ol>
-                                                                            <t t-foreach="line.type_payment"
-                                                                               t-as="type">
+                                                                            <t t-foreach="line.type_payment" t-as="type">
                                                                                 <li>
                                                                                     <t t-esc="type.name"/>
                                                                                 </li>
@@ -1196,8 +1144,7 @@
                                                     الزبائن
                                                 </td>
                                                 <td style="padding: 0px" width="75%">
-                                                    <table class="reversed-table" t-if="step_1.client"
-                                                           style="margin:0px; border: none;">
+                                                    <table class="reversed-table" t-if="step_1.client" style="margin:0px; border: none;">
                                                         <thead>
                                                             <tr>
                                                                 <th class="title-cell" width="25%">الاسم</th>
@@ -1216,8 +1163,7 @@
                                                                     </td>
                                                                     <td width="50%">
                                                                         <ol>
-                                                                            <t t-foreach="line.type_payment"
-                                                                               t-as="type">
+                                                                            <t t-foreach="line.type_payment" t-as="type">
                                                                                 <li>
                                                                                     <t t-esc="type.name"/>
                                                                                 </li>
@@ -1283,7 +1229,8 @@
                                                     <td>
                                                         <t t-foreach="line.type_demande_ids" t-as="demande">
                                                             <t t-if="len(line.type_demande_ids) != 1 and demande != line.type_demande_ids[-1]">
-                                                                <t t-esc="demande.name"/>/
+                                                                <t t-esc="demande.name"/>
+/
                                                             </t>
                                                             <t t-if="len(line.type_demande_ids) == 1 or demande == line.type_demande_ids[-1]">
                                                                 <t t-esc="demande.name"/>
@@ -1312,10 +1259,8 @@
                                 </div>
                                 <br/>
                                 <div class="table_deco">
-                                    <!--<t t-set="has_year_1_2"
-                                       t-value="etape2.bilan1_id.filtered(lambda l:l.sequence != 0 and (l.year_1 != 0 or l.year_2 != 0))"/>
-                                    <t t-set="has_year_3_4"
-                                       t-value="etape2.bilan1_id.filtered(lambda l:l.sequence != 0 and (l.year_3 != 0 or l.year_4 != 0))"/>
+                                    <!--<t t-set="has_year_1_2" t-value="etape2.bilan1_id.filtered(lambda l:l.sequence != 0 and (l.year_1 != 0 or l.year_2 != 0))"/>
+                                    <t t-set="has_year_3_4" t-value="etape2.bilan1_id.filtered(lambda l:l.sequence != 0 and (l.year_3 != 0 or l.year_4 != 0))"/>
                                     <t t-if="len(has_year_3_4) != 0 and len(has_year_1_2) != 0">
                                         <t t-set="col_value" t-value="6"/>
                                     </t>
@@ -1326,10 +1271,8 @@
                                         <t t-set="col_value" t-value="2"/>
                                     </t>-->
                                     <table class="reversed-table" t-if="step_2.bilan_id">
-                                        <t t-set="bilan1_year"
-                                           t-value="step_2.bilan_id.filtered(lambda l:l.sequence == 0)"/>
-                                        <t t-set="bilan1_lines"
-                                           t-value="step_2.bilan_id.filtered(lambda l:l.sequence != 0)"/>
+                                        <t t-set="bilan1_year" t-value="step_2.bilan_id.filtered(lambda l:l.sequence == 0)"/>
+                                        <t t-set="bilan1_lines" t-value="step_2.bilan_id.filtered(lambda l:l.sequence != 0)"/>
 
                                         <thead>
                                             <tr>
@@ -1354,8 +1297,7 @@
                                                     <td>
                                                         <t t-esc="line.declaration"/>
                                                     </td>
-                                                    <td style="text-align: right; direction: ltr;"
-                                                        t-if="len(has_year_3_4) != 0">
+                                                    <td style="text-align: right; direction: ltr;" t-if="len(has_year_3_4) != 0">
                                                         <t t-if="line.is_null_3">
                                                             N.D
                                                         </t>
@@ -1367,8 +1309,7 @@
                                                             <t t-esc="'{0:,.0f}'.format(line.year_3 / 1000)"/>
                                                         </t>
                                                     </td>
-                                                    <td style="text-align: right; direction: ltr;"
-                                                        t-if="len(has_year_3_4) != 0">
+                                                    <td style="text-align: right; direction: ltr;" t-if="len(has_year_3_4) != 0">
                                                         <t t-if="line.is_null_4">
                                                             N.D
                                                         </t>
@@ -1381,7 +1322,8 @@
                                                         </t>
                                                     </td>
                                                     <td style="text-align: right; direction: ltr;">
-                                                        <t t-esc="int(line.variante * 100)"/>%
+                                                        <t t-esc="int(line.variante * 100)"/>
+%
                                                     </td>
                                                 </tr>
                                             </t>
@@ -1393,18 +1335,15 @@
                                     <table class="reversed-table">
                                         <tbody>
                                             <tr>
-                                                <th style="text-align: center"
-                                                    class="title-cell" colspan="2">
+                                                <th style="text-align: center" class="title-cell" colspan="2">
                                                     SWOT
                                                 </th>
                                             </tr>
                                             <tr>
-                                                <th style="font-weight: bold; border: 1px solid #808080;"
-                                                    class="title-cell">
+                                                <th style="font-weight: bold; border: 1px solid #808080;" class="title-cell">
                                                     نقاط القوة
                                                 </th>
-                                                <th style="font-weight: bold; border: 1px solid #808080;"
-                                                    class="title-cell">
+                                                <th style="font-weight: bold; border: 1px solid #808080;" class="title-cell">
                                                     نقاط الضعف
                                                 </th>
                                             </tr>
@@ -1429,12 +1368,10 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th style="font-weight: bold; border: 1px solid #808080;"
-                                                    class="title-cell">
+                                                <th style="font-weight: bold; border: 1px solid #808080;" class="title-cell">
                                                     التهديدات
                                                 </th>
-                                                <th style="font-weight: bold; border: 1px solid #808080;"
-                                                    class="title-cell">
+                                                <th style="font-weight: bold; border: 1px solid #808080;" class="title-cell">
                                                     الفرص
                                                 </th>
                                             </tr>
@@ -1482,7 +1419,8 @@
                                                     <td>
                                                         <t t-foreach="line.type_demande_ids" t-as="demande">
                                                             <t t-if="len(line.type_demande_ids) != 1 and demande != line.type_demande_ids[-1]">
-                                                                <t t-esc="demande.name"/>/
+                                                                <t t-esc="demande.name"/>
+/
                                                             </t>
                                                             <t t-if="len(line.type_demande_ids) == 1 or demande == line.type_demande_ids[-1]">
                                                                 <t t-esc="demande.name"/>
@@ -1493,7 +1431,8 @@
                                                         <t t-esc="'{0:,.0f}'.format(line.montant_dz)"/>
                                                     </td>
                                                     <td>
-                                                        <t t-esc="int(line.preg * 100)"/>%
+                                                        <t t-esc="int(line.preg * 100)"/>
+%
                                                     </td>
                                                     <td>
                                                         <t t-esc="line.duree"/>
@@ -1723,108 +1662,279 @@
                                 </div>
                                 <br/>
                                 <pageBreak/>
-                                <div class="table_deco">
-                                    <table class="reversed-table">
-                                        <thead>
-                                            <tr>
-                                                <th class="title-cell">
-                                                    اعضاء لجنة التسهيلات المصغرة
-                                                </th>
-                                                <th class="title-cell">
-                                                    رئيس قطاع الخزينة و العمليات المحلية و الدولية و المالية
-                                                </th>
-                                                <th class="title-cell">
-                                                    مدير النشاط التجاري للمؤسسات
-                                                </th>
-                                            </tr>
-                                            <tr>
-                                                <th class="title-cell">
-                                                    الوظيفة
-                                                </th>
-                                                <th class="title-cell">
-                                                    عضوا
-                                                </th>
-                                                <th class="title-cell">
-                                                    عضوا
-                                                </th>
-                                            </tr>
-                                            <tr height="300px">
-                                                <td class="title-cell">
-                                                    التوقيع
-                                                </td>
-                                                <td>
-
-                                                </td>
-                                                <td>
-
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th class="title-cell">
-                                                    اعضاء لجنة التسهيلات المصغرة
-                                                </th>
-                                                <th class="title-cell">
-                                                    مديرة الدراسات الإئتمانية للمؤسسات
-                                                </th>
-                                                <th class="title-cell">
-                                                    رئيس خلية إدارة المخاطر
-                                                </th>
-                                            </tr>
-                                            <tr>
-                                                <th class="title-cell">
-                                                    الوظيفة
-                                                </th>
-                                                <th class="title-cell">
-                                                    عضوا
-                                                </th>
-                                                <th class="title-cell">
-                                                    عضوا
-                                                </th>
-                                            </tr>
-                                            <tr height="300px">
-                                                <td class="title-cell">
-                                                    التوقيع
-                                                </td>
-                                                <td>
-
-                                                </td>
-                                                <td>
-
-                                                </td>
-                                            </tr>
-                                        </thead>
-                                    </table>
+                                <div style="page-break-before: always;">
                                 </div>
-                                <br/>
-                                <div class="table_deco">
-                                    <table class="reversed-table">
-                                        <thead>
-                                            <tr>
-                                                <th class="title-cell" width="25%">
+                                <t t-if="doc.comite_type == 'comite_1'">
+                                    <div class="table_deco">
+                                        <table class="reversed-table">
+                                            <thead>
+                                                <tr>
+                                                    <th class="title-cell" width="25%">
+                                                    اعضاء لجنة التسهيلات المصغرة
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                    الاعمال التجارية
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                    مدير الدراسات الائتماني 
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <th class="title-cell" width="25%">
+                                                    الوظيفة
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                    عضوا
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                    عضوا
+                                                    </th>
+                                                </tr>
+                                                <tr height="100px">
+                                                    <td class="title-cell" width="25%">
+                                                    التوقيع
+                                                    </td>
+                                                    <td width="40%">
+
+                                                    </td>
+                                                    <td width="40%">
+
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="title-cell" width="25%">
+                                                    اعضاء لجنة التسهيلات المصغرة
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                    رئيس قطاع الخزينة 
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                    رئيس خلية ادارة المخاطر 
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <th class="title-cell" width="25%">
+                                                    الوظيفة
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                    عضوا
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                    عضوا
+                                                    </th>
+                                                </tr>
+                                                <tr height="100px">
+                                                    <td class="title-cell" width="25%">
+                                                    التوقيع
+                                                    </td>
+                                                    <td width="40%">
+
+                                                    </td>
+                                                    <td width="40%">
+
+                                                    </td>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                    <br/>
+                                    <div class="table_deco">
+                                        <table class="reversed-table">
+                                            <thead>
+                                                <tr>
+                                                    <th class="title-cell" width="25%">
                                                     رئيس اللجنة المصغرة
-                                                </th>
-                                                <th class="title-cell" width="75%">
+                                                    </th>
+                                                    <th class="title-cell" width="75%">
                                                     نائب المدير العام
-                                                </th>
-                                            </tr>
-                                            <tr>
-                                                <th class="title-cell" width="25%">
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <th class="title-cell" width="25%">
                                                     الوظيفة
-                                                </th>
-                                                <th class="title-cell" width="75%">
+                                                    </th>
+                                                    <th class="title-cell" width="75%">
                                                     رئيس اللجنة المصغرة
-                                                </th>
-                                            </tr>
-                                            <tr height="300px">
-                                                <td class="title-cell" width="25%">
+                                                    </th>
+                                                </tr>
+                                                <tr height="100px">
+                                                    <td class="title-cell" width="25%">
                                                     التوقيع
-                                                </td>
-                                                <td width="75%">
-                                                </td>
-                                            </tr>
-                                        </thead>
-                                    </table>
-                                </div>
+                                                    </td>
+                                                    <td width="75%">
+                                                    </td>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </t>
+                                <t t-if="doc.comite_type == 'comite_2'">
+                                    <div class="table_deco">
+                                        <table class="reversed-table">
+                                            <thead>
+                                                <tr>
+                                                    <th class="title-cell" width="25%">
+                                             اعضاء لجنة التسهيلات الموسعة
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                    الاعمال التجارية
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                    مدير الدراسات الائتماني 
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <th class="title-cell" width="25%">
+                                                    الوظيفة
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                    عضوا
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                    عضوا
+                                                    </th>
+                                                </tr>
+                                                <tr height="100px">
+                                                    <td class="title-cell" width="25%">
+                                                    التوقيع
+                                                    </td>
+                                                    <td width="40%">
+
+                                                    </td>
+                                                    <td width="40%">
+
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="title-cell" width="25%">
+                                            اعضاء لجنة التسهيلات الموسعة
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                      رئيس خلية ادارة التمويلات
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                   رئيس قطاع الخزينة 
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <th class="title-cell" width="25%">
+                                                    الوظيفة
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                    عضوا
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                    عضوا
+                                                    </th>
+                                                </tr>
+                                                <tr height="100px">
+                                                    <td class="title-cell" width="25%">
+                                                    التوقيع
+                                                    </td>
+                                                    <td width="40%">
+
+                                                    </td>
+                                                    <td width="40%">
+
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th class="title-cell" width="25%">
+                                             اعضاء لجنة التسهيلات الموسعة
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                   رئيس خلية ادارة المخاطر 
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                   مستشار نائب المدير العام المكلف بالاستشراف التجاري
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <th class="title-cell" width="25%">
+                                                    الوظيفة
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                    عضوا
+                                                    </th>
+                                                    <th class="title-cell" width="40%">
+                                                    عضوا
+                                                    </th>
+                                                </tr>
+                                                <tr height="100px">
+                                                    <td class="title-cell" width="25%">
+                                                    التوقيع
+                                                    </td>
+                                                    <td width="40%">
+
+                                                    </td>
+                                                    <td width="40%">
+
+                                                    </td>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                    <br/>
+                                    <div class="table_deco">
+                                        <table class="reversed-table">
+                                            <thead>
+                                                <tr>
+                                                    <th class="title-cell" width="25%">
+                                                    نائب اللجنة الموسعة 
+                                                    </th>
+                                                    <th class="title-cell" width="75%">
+                                                    نائب المدير العام
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <th class="title-cell" width="25%">
+                                                    الوظيفة
+                                                    </th>
+                                                    <th class="title-cell" width="75%">
+                                                    نائب اللجنة الموسعة
+                                                    </th>
+                                                </tr>
+                                                <tr height="100px">
+                                                    <td class="title-cell" width="25%">
+                                                    التوقيع
+                                                    </td>
+                                                    <td width="75%">
+                                                    </td>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                    <br/>
+                                    <div class="table_deco">
+                                        <table class="reversed-table">
+                                            <thead>
+                                                <tr>
+                                                    <th class="title-cell" width="25%">
+                                                    رئيس اللجنة الموسعة
+                                                    </th>
+                                                    <th class="title-cell" width="75%">
+                                                 المدير العام
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <th class="title-cell" width="25%">
+                                                    الوظيفة
+                                                    </th>
+                                                    <th class="title-cell" width="75%">
+                                                    رئيس اللجنة الموسعة
+                                                    </th>
+                                                </tr>
+                                                <tr height="100px">
+                                                    <td class="title-cell" width="25%">
+                                                    التوقيع
+                                                    </td>
+                                                    <td width="75%">
+                                                    </td>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </t>
                             </div>
                         </div>
                     </t>
