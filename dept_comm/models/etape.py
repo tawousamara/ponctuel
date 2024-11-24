@@ -198,7 +198,12 @@ class Etape(models.Model):
 
     workflow = fields.Many2one('wk.workflow.ponctuel', ondelete="cascade")
     state_etape = fields.Selection([('1', 'قيد الدراسة'),
-                                    ('2', 'انتهاء التحليل')], default='1')
+                                    ('2', 'انتهاء التحليل'),
+                                    ], default='1')
+    state_etape_commercial = fields.Selection([('1', 'قيد الدراسة'),
+                                    ('2', 'مدير الاعمال التجارية'),
+                                    ('3', 'انتهاء التحليل'),
+                                    ], default='1')
     etape = fields.Many2one('wk.state.ponctuel', string='Etape')
     name = fields.Char(string='Nom', related='etape.name', store=True)
     sequence = fields.Integer(string='Sequence', related='etape.sequence')
@@ -357,6 +362,30 @@ class Etape(models.Model):
 
     annee_fiscal = fields.Integer(string='السنة المالية N', compute='change_annee')
 
+    def validate_information_commercial(self):
+        for rec in self:
+            if rec.state_etape_commercial == '1':
+                rec.state_etape_commercial = '2'
+            else:
+                if rec.state_etape_commercial == '2':
+                    rec.state_etape_commercial = '3'
+                    template = self.env.ref('dept_comm.email_template_ponctuel')
+                    return {
+                        'name': _("تاكيد"),
+                        'type': 'ir.actions.act_window',
+                        'view_type': 'form',
+                        'view_mode': 'form',
+                        'res_model': 'confirmation.mail.send',
+                        'target': 'new',
+                        'context': {
+                            'relance': False,
+                            'is_step': True,
+                            'default_folder_id': rec.workflow.id,
+                            'default_step_id': rec.id,
+                            'default_mail_template_id': template.id,
+                        },
+                    }
+
     def compute_pourcentage_state(self):
         for rec in self:
             partner = rec.workflow.states.filtered(lambda l: l.sequence == 1).gerant
@@ -372,6 +401,13 @@ class Etape(models.Model):
                 rec.state_compute = 0
             else:
                 rec.state_compute = 1
+            if rec.etape.sequence == 2:
+                if rec.state_etape_commercial == '1':
+                    rec.state_compute = 0
+                elif rec.state_etape_commercial == '2':
+                    rec.state_compute = 0.5
+                else:
+                    rec.state_compute = 1
 
     def action_create_tcr(self):
         for rec in self:
@@ -399,7 +435,6 @@ class Etape(models.Model):
                 'context': {'step_id': rec.id}
             }
 
-
     def action_create_passif(self):
         for rec in self:
             view_id = self.env.ref('financial_modeling.import_ocr_passif_view_form').id
@@ -414,22 +449,22 @@ class Etape(models.Model):
             }
     def validate_information(self):
         for rec in self:
-                template = self.env.ref('dept_comm.email_template_ponctuel')
-                return {
-                    'name': _("تاكيد"),
-                    'type': 'ir.actions.act_window',
-                    'view_type': 'form',
-                    'view_mode': 'form',
-                    'res_model': 'confirmation.mail.send',
-                    'target': 'new',
-                    'context': {
-                        'relance': False,
-                        'is_step': True,
-                        'default_folder_id': rec.workflow.id,
-                        'default_step_id': rec.id,
-                        'default_mail_template_id': template.id,
-                    },
-                }
+            template = self.env.ref('dept_comm.email_template_ponctuel')
+            return {
+                'name': _("تاكيد"),
+                'type': 'ir.actions.act_window',
+                'view_type': 'form',
+                'view_mode': 'form',
+                'res_model': 'confirmation.mail.send',
+                'target': 'new',
+                'context': {
+                    'relance': False,
+                    'is_step': True,
+                    'default_folder_id': rec.workflow.id,
+                    'default_step_id': rec.id,
+                    'default_mail_template_id': template.id,
+                },
+            }
 
     def validate_information_function(self):
         for rec in self:

@@ -173,7 +173,7 @@
                             <field name="recommendation_3" readonly="state != '6'"/>
                         </group>
                     </div>
-                    <div invisible="comite_type == 'comite_1'">>
+                    <div invisible="comite_type == 'comite_1'">
                         <group>
                             <field name="recommendation_6" invisible="state in ['1','2','3','4','5','6']" readonly="state != '7'"/>
                         </group>
@@ -183,7 +183,7 @@
                             <field name="recommendation_8" invisible="state in ['1','2','3','4','5','6','7']" readonly="state != '8'"/>
                         </group>
                     </div>
-                    <div>
+                    <div invisible="comite_type == 'comite_1'">
                         <group>
                             <field name="recommendation_9" invisible="state in ['1','2','3','4','5','6','7','8']" readonly="state != '9'"/>
                         </group>

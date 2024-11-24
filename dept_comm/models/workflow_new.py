@@ -659,7 +659,7 @@ class Ponctuel(models.Model):
                 rec.env['wk.etape.ponctuel'].create({
                     'workflow': rec.id,
                     'etape': self.env.ref('dept_comm.principe_1').id,
-                    'nom_client': rec.nom_client
+                    'nom_client': rec.nom_client.id
                 })
 
     def _get_partner(self):
