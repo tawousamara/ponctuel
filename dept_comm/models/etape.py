@@ -197,6 +197,7 @@ class Etape(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     workflow = fields.Many2one('wk.workflow.ponctuel', ondelete="cascade")
+    workflow_old = fields.Many2one('wk.workflow.dashboard', string='ملف سابق',related="workflow.workflow_old")
     state_etape = fields.Selection([('1', 'قيد الدراسة'),
                                     ('2', 'انتهاء التحليل'),
                                     ], default='1')
@@ -680,12 +681,12 @@ class Etape(models.Model):
             view_id = self.env.ref('financial_modeling.import_ocr_tcr_view_form').id
             return {
                 'name': 'TCR',
-                'domain': [('parent_id', '=', rec.id)],
+                'domain': [('step_id', '=', rec.id)],
                 'res_model': 'import.ocr.tcr',
                 'view_mode': 'form',
                 'view_id': view_id,
                 'type': 'ir.actions.act_window',
-                'context': {'parent_id': rec.id, 'year': 1}
+                'context': {'step_id': rec.id, 'year': 1}
             }
             
     def action_create_actif(self):
@@ -693,12 +694,12 @@ class Etape(models.Model):
             view_id = self.env.ref('financial_modeling.import_ocr_actif_view_form').id
             return {
                 'name': 'Actif',
-                'domain': [('parent_id', '=', rec.id)],
+                'domain': [('step_id', '=', rec.id)],
                 'res_model': 'import.ocr.actif',
                 'view_mode': 'form',
                 'view_id': view_id,
                 'type': 'ir.actions.act_window',
-                'context': {'parent_id': rec.id, 'year': 1}
+                'context': {'step_id': rec.id, 'year': 1}
             }
     
     def action_create_passif(self):
@@ -706,13 +707,410 @@ class Etape(models.Model):
             view_id = self.env.ref('financial_modeling.import_ocr_passif_view_form').id
             return {
                 'name': 'Passif',
-                'domain': [('parent_id', '=', rec.id)],
+                'domain': [('step_id', '=', rec.id)],
                 'res_model': 'import.ocr.passif',
                 'view_mode': 'form',
                 'view_id': view_id,
                 'type': 'ir.actions.act_window',
-                'context': {'parent_id': rec.id, 'year': 1}
+                'context': {'step_id': rec.id, 'year': 1}
             }
+    
+    def import_data(self):
+        for rec in self:
+            if rec.tcr_id.state not in ['valide', 'modified'] or rec.actif_id.state not in ['valide', 'modified'] or rec.passif_id.state not in ['valide', 'modified']:
+                raise ValidationError("Vous devriez d'abord valider les bilans")
+            else:
+                to_delete = rec.bilan_id.filtered(lambda r: r.declaration in ['ACTIF NET IMMOBILISE CORPOREL',
+                                                                              'الات ومعدات و عتاد نقل',
+                                                                              'إهتلاكات المعدات',
+                                                                              'اهتلاكات / آلات و معدات و عتاد نقل'])
+                if to_delete:
+                    to_delete1 = rec.bilan1_id.filtered(lambda r: r.sequence in [6, 7, 8, 9])
+                    to_delete.unlink()
+                    to_delete1.unlink()
+                    other_bilan = rec.bilan_id.filtered(lambda r: r.sequence >= 6)
+                    count = 6
+                    for item in other_bilan:
+                        in_view = self.env[f'wk.bilan.cat{item.categorie}'].search([('bilan', '=', item.id)])
+                        item.sequence = in_view.sequence = count
+                        count += 1
+                    print(other_bilan)
+                bilan_1 = rec.bilan_id.filtered(lambda r: r.sequence == 1)
+                # total I حقوق الملكية
+                passif_1 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 12)
+                bilan_1.write({ 'year_4': passif_1.montant_n,
+                                'year_3': passif_1.montant_n1})
+
+                # capital emis رأس المال
+                bilan_2 = rec.bilan_id.filtered(lambda r: r.sequence == 2)
+                passif_2 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 2)
+                bilan_2.write({'year_4': passif_2.montant_n,
+                                'year_3': passif_2.montant_n1})
+
+                # Passif - Autres capitaux propres - report à nouveau الاحتياطات
+                bilan_3 = rec.bilan_id.filtered(lambda r: r.sequence == 3)
+                passif_3 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 4)
+                bilan_3.write({'year_4': passif_3.montant_n,
+                                'year_3': passif_3.montant_n1})
+
+                # الارباح المتراكمة
+                bilan_4 = rec.bilan_id.filtered(lambda r: r.sequence == 4)
+                passif_3 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 8)
+                tcr_3 = rec.tcr_id.tcr_lines.filtered(lambda r: r.rubrique.sequence == 50)
+                bilan_4.write({'year_4': passif_3.montant_n + tcr_3.montant_n,
+                                'year_3': passif_3.montant_n1 + tcr_3.montant_n1})
+
+                #حقوق الملكية / مجموع الميزانية
+                bilan_5 = rec.bilan_id.filtered(lambda r: r.sequence == 5)
+                passif_12 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 25)
+                bilan_5.write({'year_4': (passif_1.montant_n / passif_12.montant_n) * 100 if passif_12.montant_n != 0 else 0,
+                               'year_3': (passif_1.montant_n1 / passif_12.montant_n1) * 100 if passif_12.montant_n1 != 0 else 0})
+                if passif_12.montant_n == 0:
+                    bilan_5.is_null_4 = True
+                else:
+                    bilan_5.is_null_4 = False
+                if passif_12.montant_n1 == 0:
+                    bilan_5.is_null_3 = True
+                else:
+                    bilan_5.is_null_3 = False
+                    
+                # Passif (Total I + Total II) - Total actif non courant   صافي رأس المال العامل
+                actif_2 = rec.actif_id.actif_lines.filtered(lambda r: r.rubrique.sequence == 16)
+                actif1_2 = rec.actif1_id.actif_lines.filtered(lambda r: r.rubrique.sequence == 16)
+                actif_27 = rec.actif_id.actif_lines.filtered(lambda r: r.rubrique.sequence == 27)
+                passif_24 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 24)
+                bilan_10 = rec.bilan_id.filtered(lambda r: r.sequence == 6)
+                bilan_10.write({'year_4': actif_27.montant_n - passif_24.montant_n,
+                                'year_3': actif_27.montant_n1 - passif_24.montant_n1
+                                })
+
+                # احتياجات رأس المال العامل
+                passif_5 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 23)
+                passif1_5 = rec.passif1_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 23)
+                bilan_11 = rec.bilan_id.filtered(lambda r: r.sequence == 7)
+                passif_20 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 20)
+                passif1_20 = rec.passif1_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 20)
+                actif_18 = rec.actif_id.actif_lines.filtered(lambda r: r.rubrique.sequence == 18)
+                actif_20 = rec.actif_id.actif_lines.filtered(lambda r: r.rubrique.sequence == 20)
+                actif_126 = rec.actif_id.actif_lines.filtered(lambda r: r.rubrique.sequence == 26)
+                bilan_11.write({'year_4': actif_27.montant_n - actif_126.montant_n - (passif_24.montant_n - passif_5.montant_n),
+                                'year_3': actif_27.montant_n1 - actif_126.montant_n1 - (passif_24.montant_n1 - passif_5.montant_n1),
+                                })
+
+                # FR / BFR Passif (Total I + Total II) - Actif (Total actif non courant)  / Actif (Stock et encours + Créances et emploi assimili + Disponibilité et assimilé) - Passif (Total III)
+                bilan_12 = rec.bilan_id.filtered(lambda r: r.sequence == 8)
+                actif_4 = rec.actif_id.actif_lines.filtered(lambda r: r.rubrique.sequence == 18)
+
+                if bilan_11.year_4 == 0:
+                    bilan_12.is_null_4 = True
+                if bilan_11.year_4 == 0:
+                    bilan_12.is_null_3 = True
+                if bilan_11.year_4 == 0:
+                    bilan_12.is_null_2 = True
+                if bilan_11.year_4 == 0:
+                    bilan_12.is_null_1 = True
+                bilan_12.write({'year_4': (bilan_10.year_4 / bilan_11.year_4) * 100 if bilan_11.year_4 != 0 else 0,
+                                'year_3': (bilan_10.year_3 / bilan_11.year_3) * 100 if bilan_11.year_3 != 0 else 0,
+                                })
+                # مجموع المطلوبات Passif - Total II + Total III
+                bilan_13 = rec.bilan_id.filtered(lambda r: r.sequence == 9)
+                passif_5 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 18)
+                passif_6 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 24)
+                bilan_13.write({'year_4': passif_5.montant_n + passif_6.montant_n, 
+                                'year_3': passif_5.montant_n1 + passif_6.montant_n1, 
+                                })
+
+                # التزامات بنكية
+                bilan_14 = rec.bilan_id.filtered(lambda r: r.sequence == 10)
+                passif_5 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 23)
+                passif_6 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 14)
+
+                bilan_14.write({'year_4': passif_5.montant_n + passif_6.montant_n,
+                                'year_3': passif_5.montant_n1 + passif_6.montant_n1,
+                                })
+                # تسهيلات الموردين
+                bilan_15 = rec.bilan_id.filtered(lambda r: r.sequence == 11)
+                passif_7 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 20)
+                var_5 = rec.var_ids.filtered(lambda r: r.sequence == 5)
+                bilan_15.write({'year_4': passif_7.montant_n,
+                               'year_3': passif_7.montant_n1})
+
+                var_5.write({'montant': passif_7.montant_n})
+
+                # Passif - Impôts مستحقات ضرائب
+                bilan_16 = rec.bilan_id.filtered(lambda r: r.sequence == 12)
+                passif_8 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 21)
+                bilan_16.write({'year_4': passif_8.montant_n,
+                               'year_3': passif_8.montant_n1
+                               })
+
+                #Passif - Autres dettes + fournisseur  مطلوبات أخرى متداولة
+                bilan_17 = rec.bilan_id.filtered(lambda r: r.sequence == 13)
+                passif_8 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 22)
+                bilan_17.write({'year_4': passif_8.montant_n,
+                                'year_3': passif_8.montant_n1
+                                })
+
+                # (Emprunts et dettes financières passif + Trésorerie passif - Trésorerie coté actif ) / Total I coté passif نسبة المديونية Leverage
+                bilan_18 = rec.bilan_id.filtered(lambda r: r.sequence == 14)
+                passif_18 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 18)
+                passif_24 = rec.passif_id.passif_lines.filtered(lambda r: r.rubrique.sequence == 24)
+                bilan_18.write({'year_4': (passif_18.montant_n + passif_24.montant_n) / passif_1.montant_n if passif_1.montant_n != 0 else 0,
+                               'year_3': (passif_18.montant_n1 + passif_24.montant_n1) / passif_1.montant_n1 if passif_1.montant_n1 != 0 else 0
+                               })
+                if passif_1.montant_n == 0:
+                    bilan_18.is_null_4 = True
+                else:
+                    bilan_18.is_null_4 = False
+                if passif_1.montant_n1 == 0:
+                    bilan_18.is_null_3 = True
+                else:
+                    bilan_18.is_null_3 = False
+
+                #الالتزامات اتجاه البنوك / الحقوق
+                bilan_19 = rec.bilan_id.filtered(lambda r: r.sequence == 15)
+                bilan_19.write({'year_4': bilan_14.year_4 / passif_1.montant_n if passif_1.montant_n != 0 else 0,
+                                'year_3': bilan_14.year_3 / passif_1.montant_n1 if passif_1.montant_n1 != 0 else 0
+                                })
+
+                if passif_1.montant_n == 0:
+                    bilan_19.is_null_4 = True
+                else:
+                    bilan_19.is_null_4 = False
+                if passif_1.montant_n1 == 0:
+                    bilan_19.is_null_3 = True
+                else:
+                    bilan_19.is_null_3 = False
+
+                # مجموع الميزانية
+                bilan_20 = rec.bilan_id.filtered(lambda r: r.sequence == 16)
+                bilan_20.write({'year_4': passif_12.montant_n,
+                                'year_3': passif_12.montant_n1
+                                })
+                # المبيعات ، الايرادات
+                bilan_21 = rec.bilan_id.filtered(lambda r: r.sequence == 17)
+                tcr_1 = rec.tcr_id.tcr_lines.filtered(lambda r: r.rubrique.sequence == 7)
+                tcr1_1 = rec.tcr1_id.tcr_lines.filtered(lambda r: r.rubrique.sequence == 7)
+                var_1 = rec.var_ids.filtered(lambda r: r.sequence == 1)
+                bilan_21.write({'year_4': tcr_1.montant_n,
+                                'year_3': tcr_1.montant_n1
+                                })
+                var_1.write({'montant': tcr_1.montant_n})
+                # TCR- Excédent brut d`exploitation   EBITDA
+                bilan_22 = rec.bilan_id.filtered(lambda r: r.sequence == 18)
+                tcr_2 = rec.tcr_id.tcr_lines.filtered(lambda r: r.rubrique.sequence == 33)
+                bilan_22.write({'year_4': tcr_2.montant_n,
+                                'year_3': tcr_2.montant_n1})
+
+                # TCR - Résultat net de l`exercice   صافي الأرباح
+                bilan_23 = rec.bilan_id.filtered(lambda r: r.sequence == 19)
+                tcr_3 = rec.tcr_id.tcr_lines.filtered(lambda r: r.rubrique.sequence == 50)
+                bilan_23.write({'year_4': tcr_3.montant_n,
+                                'year_3': tcr_3.montant_n1})
+
+                bilan_24 = rec.bilan_id.filtered(lambda r: r.sequence == 20)
+                # صافي الأرباح/المبيعات
+                bilan_24.write({'year_4': (tcr_3.montant_n / tcr_1.montant_n) * 100 if tcr_1.montant_n != 0 else 0,
+                                'year_3': (tcr_3.montant_n1 / tcr_1.montant_n1) * 100 if tcr_1.montant_n1 != 0 else 0})
+
+                if tcr_1.montant_n == 0:
+                    bilan_24.is_null_4 = True
+                else:
+                    bilan_24.is_null_4 = False
+                if tcr_1.montant_n1 == 0:
+                    bilan_24.is_null_3 = True
+                else:
+                    bilan_24.is_null_3 = False
+                if tcr1_1.montant_n == 0:
+                    bilan_24.is_null_2 = True
+                else:
+                    bilan_24.is_null_2 = False
+                if tcr1_1.montant_n1 == 0:
+                    bilan_24.is_null_1 = True
+                else:
+                    bilan_24.is_null_1 = False
+                # معدل العائد على الموجودات ROA
+                bilan_25 = rec.bilan_id.filtered(lambda r: r.sequence == 21)
+                bilan_25.write({'year_4': (tcr_3.montant_n / actif_2.montant_n) * 100 if actif_2.montant_n != 0 else 0,
+                                'year_3': (tcr_3.montant_n1 / actif_2.montant_n1) * 100 if actif_2.montant_n1 != 0 else 0})
+
+                if actif_2.montant_n == 0:
+                    bilan_25.is_null_4 = True
+                else:
+                    bilan_25.is_null_4 = False
+                if actif_2.montant_n1 == 0:
+                    bilan_25.is_null_3 = True
+                else:
+                    bilan_25.is_null_3 = False
+                if actif1_2.montant_n == 0:
+                    bilan_25.is_null_2 = True
+                else:
+                    bilan_25.is_null_2 = False
+                if actif1_2.montant_n1 == 0:
+                    bilan_25.is_null_1 = True
+                else:
+                    bilan_25.is_null_1 = False
+                # معدل العائد على حقوق الملكية ROE
+                bilan_26 = rec.bilan_id.filtered(lambda r: r.sequence == 22)
+                bilan_26.write({'year_4': (tcr_3.montant_n / passif_1.montant_n) * 100 if passif_1.montant_n != 0 else 0,
+                                'year_3': (tcr_3.montant_n1 / passif_1.montant_n1) * 100 if passif_1.montant_n1 != 0 else 0})
+
+                if passif_1.montant_n == 0:
+                    bilan_26.is_null_4 = True
+                else:
+                    bilan_26.is_null_4 = False
+                if passif_1.montant_n1 == 0:
+                    bilan_26.is_null_3 = True
+                else:
+                    bilan_26.is_null_3 = False
+                    
+                # التدفقات النقدية التشغيلية
+                bilan_27 = rec.bilan_id.filtered(lambda r: r.sequence == 23)
+                tcr_36 = rec.tcr_id.tcr_lines.filtered(lambda r: r.rubrique.sequence == 36)
+                bilan_27.write(
+                    {'year_4': tcr_3.montant_n + tcr_36.montant_n,
+                     'year_3': tcr_3.montant_n1 + tcr_36.montant_n1})
+
+                # نسبة التداول (السيولة)
+                actif_26 = rec.actif_id.actif_lines.filtered(lambda r: r.rubrique.sequence == 26)
+                bilan_28 = rec.bilan_id.filtered(lambda r: r.sequence == 24)
+                bilan_28.write({'year_4': (actif_26.montant_n + actif_18.montant_n + actif_20.montant_n) / (passif_5.montant_n + passif_20.montant_n) if passif_5.montant_n + passif_20.montant_n != 0 else 0,
+                                'year_3': (actif_26.montant_n1 + actif_18.montant_n1 + actif_20.montant_n1) / (passif_5.montant_n1 + passif_20.montant_n1) if passif_5.montant_n1 + passif_20.montant_n1 != 0 else 0})
+
+                #نسبة السيولة السريعة
+                bilan_29 = rec.bilan_id.filtered(lambda r: r.sequence == 25)
+                bilan_29.write({'year_4': (actif_26.montant_n) / (passif_5.montant_n + passif_20.montant_n) if passif_5.montant_n + passif_20.montant_n != 0 else 0,
+                                'year_3': (actif_26.montant_n) / (passif_5.montant_n1 + passif_20.montant_n1) if passif_5.montant_n1 + passif_20.montant_n1 != 0 else 0
+                                })
+
+                if (passif_5.montant_n + passif_20.montant_n) == 0:
+                    bilan_28.is_null_4 = True
+                    bilan_29.is_null_4 = True
+                else:
+                    bilan_28.is_null_4 = False
+                    bilan_29.is_null_4 = False
+                if (passif_5.montant_n1 + passif_20.montant_n1) == 0:
+                    bilan_28.is_null_3 = True
+                    bilan_29.is_null_3 = True
+                else:
+                    bilan_28.is_null_3 = False
+                    bilan_29.is_null_3 = False
+                if (passif1_5.montant_n + passif1_20.montant_n) == 0:
+                    bilan_28.is_null_2 = True
+                    bilan_29.is_null_2 = True
+                else:
+                    bilan_28.is_null_2 = False
+                    bilan_29.is_null_2 = False
+                if (passif1_5.montant_n1 + passif1_20.montant_n1) == 0:
+                    bilan_28.is_null_1 = True
+                    bilan_29.is_null_1 = True
+                else:
+                    bilan_28.is_null_1 = False
+                    bilan_29.is_null_1 = False
+                #حقوق عند الزبائن
+                bilan_30 = rec.bilan_id.filtered(lambda r: r.sequence == 26)
+                actif_5 = rec.actif_id.actif_lines.filtered(lambda r: r.rubrique.sequence == 20)
+                var_3 = rec.var_ids.filtered(lambda r: r.sequence == 3)
+                bilan_30.write({'year_4': actif_5.montant_n,
+                                'year_3': actif_5.montant_n1
+                                })
+                var_3.write({'montant': actif_5.montant_n})
+
+                # المخزون
+                bilan_31 = rec.bilan_id.filtered(lambda r: r.sequence == 27)
+                bilan_31.write({'year_4': actif_4.montant_n,
+                                'year_3': actif_4.montant_n1
+                                })
+                var_4 = rec.var_ids.filtered(lambda r: r.sequence == 4)
+                var_4.write({'montant': actif_4.montant_n})
+
+                #متوسط دوران المخزون (يوم)
+                bilan_32 = rec.bilan_id.filtered(lambda r: r.sequence == 28)
+                tcr_5 = rec.tcr_id.tcr_lines.filtered(lambda r: r.rubrique.sequence == 12)
+                tcr1_5 = rec.tcr1_id.tcr_lines.filtered(lambda r: r.rubrique.sequence == 12)
+                tcr_6 = rec.tcr_id.tcr_lines.filtered(lambda r: r.rubrique.sequence == 13)
+                tcr1_6 = rec.tcr1_id.tcr_lines.filtered(lambda r: r.rubrique.sequence == 13)
+                tcr_14 = rec.tcr_id.tcr_lines.filtered(lambda r: r.rubrique.sequence == 14)
+                tcr1_14 = rec.tcr1_id.tcr_lines.filtered(lambda r: r.rubrique.sequence == 14)
+                var_2 = rec.var_ids.filtered(lambda r: r.sequence == 2)
+                bilan_32.write({'year_4': (actif_4.montant_n * 360) / (tcr_5.montant_n + tcr_6.montant_n + tcr_14.montant_n) if (tcr_5.montant_n + tcr_6.montant_n + tcr_14.montant_n) != 0 else 0,
+                                'year_3': (actif_4.montant_n1 * 360) / (tcr_5.montant_n1 + tcr_6.montant_n1 + tcr_14.montant_n1) if (tcr_5.montant_n1 + tcr_6.montant_n1 + tcr_14.montant_n1) != 0 else 0
+                                })
+
+                if (tcr_5.montant_n + tcr_6.montant_n + tcr_14.montant_n) == 0:
+                    bilan_32.is_null_4 = True
+                else:
+                    bilan_32.is_null_4 = False
+                if (tcr_5.montant_n1 + tcr_6.montant_n1 + tcr_14.montant_n1) == 0:
+                    bilan_32.is_null_3 = True
+                else:
+                    bilan_32.is_null_3 = False
+                if (tcr1_5.montant_n + tcr1_6.montant_n + tcr1_14.montant_n) == 0:
+                    bilan_32.is_null_2 = True
+                else:
+                    bilan_32.is_null_2 = False
+                if (tcr1_5.montant_n1 + tcr1_6.montant_n1 + tcr1_14.montant_n1) == 0:
+                    bilan_32.is_null_1 = True
+                else:
+                    bilan_32.is_null_1 = False
+
+                var_2.write({'montant': (tcr_5.montant_n + tcr_6.montant_n)})
+                recap_2 = rec.recap_ids.filtered(lambda r: r.sequence == 2)
+                recap_2.write({'montant': bilan_32.year_4})
+                #متوسط فترة التحصيل (يوم)
+
+                bilan_33 = rec.bilan_id.filtered(lambda r: r.sequence == 29)
+                bilan_33.write({'year_4': (actif_5.montant_n * 360) / tcr_1.montant_n if tcr_1.montant_n != 0 else 0,
+                                'year_3': (actif_5.montant_n1 * 360) / tcr_1.montant_n1 if tcr_1.montant_n1 != 0 else 0})
+                if tcr_1.montant_n == 0:
+                    bilan_33.is_null_4 = True
+                else:
+                    bilan_33.is_null_4 = False
+                if tcr_1.montant_n1 == 0:
+                    bilan_33.is_null_3 = True
+                else:
+                    bilan_33.is_null_3 = False
+                if tcr1_1.montant_n == 0:
+                    bilan_33.is_null_2 = True
+                else:
+                    bilan_33.is_null_2 = False
+                if tcr1_1.montant_n1 == 0:
+                    bilan_33.is_null_1 = True
+                else:
+                    bilan_33.is_null_1 = False
+                recap_1 = rec.recap_ids.filtered(lambda r: r.sequence == 1)
+                recap_1.write({'montant': bilan_33.year_4})
+
+                #متوسط مدة تسهيلات الموردين (يوم)
+                bilan_34 = rec.bilan_id.filtered(lambda r: r.sequence == 30)
+                bilan_34.write({'year_4': (passif_7.montant_n * 360) / (tcr_5.montant_n + tcr_6.montant_n) if (tcr_5.montant_n + tcr_6.montant_n) != 0 else 0,
+                                'year_3': (passif_7.montant_n1 * 360) / (tcr_5.montant_n1 + tcr_6.montant_n1) if (tcr_5.montant_n1 + tcr_6.montant_n1) != 0 else 0
+                                })
+                if (tcr_5.montant_n + tcr_6.montant_n) == 0:
+                    bilan_34.is_null_4 = True
+                else:
+                    bilan_34.is_null_4 = False
+                if (tcr_5.montant_n1 + tcr_6.montant_n1) == 0:
+                    bilan_34.is_null_3 = True
+                else:
+                    bilan_34.is_null_3 = False
+                if (tcr1_5.montant_n + tcr1_6.montant_n) == 0:
+                    bilan_34.is_null_2 = True
+                else:
+                    bilan_34.is_null_2 = False
+                if (tcr1_5.montant_n1 + tcr1_6.montant_n1) == 0:
+                    bilan_34.is_null_1 = True
+                else:
+                    bilan_34.is_null_1 = False
+
+                recap_3 = rec.recap_ids.filtered(lambda r: r.sequence == 3)
+                recap_3.write({'montant': bilan_34.year_4})
+                recap_4 = rec.recap_ids.filtered(lambda r: r.sequence == 4)
+                recap_4.write({'montant': (bilan_10.year_4 * 360) / tcr_1.montant_n if tcr_1.montant_n != 0 else 0})
+                recap_5 = rec.recap_ids.filtered(lambda r: r.sequence == 5)
+                recap_5.write({'montant': passif_5.montant_n})
+                recap_to_delete = rec.recap_ids.filtered(lambda r: r.sequence in [6, 7])
+                recap_to_delete.unlink()
 
 def view_viz(data1, data2):
     year = ["N-2", "N-1", "N"]

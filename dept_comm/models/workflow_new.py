@@ -202,7 +202,7 @@ class Ponctuel(models.Model):
     chiffre_affaire_creation = fields.Monetary(string='راس المال التاسيسي KDA', currency_field='currency_id',related='nom_client.chiffre_affaire_creation')
     montant_demande = fields.Float(string='المبلغ المطلوب')
     active = fields.Boolean(default=True)
-    workflow_old = fields.Many2one('wk.workflow.dashboard', string='ملف سابق',)
+    workflow_old = fields.Many2one('wk.workflow.dashboard', string='ملف سابق')
     explanation = fields.Text(string='الغرض من الطلب')
     lanced = fields.Boolean(string='Traitement lancé', compute='compute_visible_states')
     plan_ids = fields.One2many('wk.ponctuel.charge', 'ponctuel_id')
@@ -617,11 +617,19 @@ class Ponctuel(models.Model):
             print('states_ids', states_ids)
             values = {}
             for etape in states_ids:
+                print('333333333333333333333333333')
                 dict1 = get_values(rec, etape)
+                print('444444444444444444444444444')
                 values.update(dict1)
+                print('5555555555555555555555555555')
             vals = values
-            vals.pop('etape')
+            try:
+                vals.pop('etape')
+            except:
+                continue
+            
             rec.write(vals)
+            print(vals)
             for etape in states:
                 exist = rec.states.filtered(lambda l: l.sequence == etape.sequence)
                 if exist:
@@ -796,7 +804,7 @@ def get_lists(self, etape_new,step , etape_old):
         step.situations_fin.unlink()
         step.client.unlink()
         step.fournisseur.unlink()
-        #etape_new.companies_fisc.unlink()
+        etape_new.companies_fisc.unlink()
         for kyc in etape_old.kyc:
             self.env['wk.kyc.details'].create({'info': kyc.info,
                                                'answer': kyc.answer,
@@ -881,13 +889,15 @@ def get_lists(self, etape_new,step , etape_old):
         etape_new.risque_central.unlink()
         etape_new.position_tax.unlink()
         etape_new.companies.unlink()
-        etape_new.bilan_id.unlink()
+            
+        # etape_new.bilan_id.unlink()
         etape_new.bilan1_id.unlink()
         etape_new.bilan2_id.unlink()
         etape_new.bilan3_id.unlink()
         etape_new.bilan4_id.unlink()
         etape_new.bilan5_id.unlink()
-        #etape_new.companies_fisc.unlink()
+        etape_new.companies_fisc.unlink()
+
         etape_new.mouvement_group.unlink()
         etape_new.mouvement.unlink()
         etape_new.recap_ids.unlink()
@@ -912,7 +922,7 @@ def get_lists(self, etape_new,step , etape_old):
         step.bilan3_id.unlink()
         step.bilan4_id.unlink()
         step.bilan5_id.unlink()
-        #step.companies_fisc.unlink()
+        step.companies_fisc.unlink()
         step.mouvement.unlink()
         step.mouvement_group.unlink()
         step.recap_ids.unlink()
