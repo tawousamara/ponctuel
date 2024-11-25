@@ -386,6 +386,20 @@
                         </notebook>
                         <notebook invisible="sequence in [1]">
                             <page string="البيانات المالية للشركة (KDA)">
+                                <group col="3">
+                                    <group>
+                                        <button name="action_create_tcr" type="object" string="اضف TCR للعام N و N-1" class="button_secondary" invisible="tcr_id != False"/>
+                                        <field name="tcr_id" invisible="tcr_id == False" readonly="1"/>
+                                    </group>
+                                    <group>
+                                        <button name="action_create_actif" type="object" string="اضف Actif للعام N و N-1" class="button_secondary" invisible="actif_id != False"/>
+                                        <field name="actif_id" invisible="actif_id == False" readonly="1"/>
+                                    </group>
+                                    <group>
+                                        <button name="action_create_passif" type="object" string="اضف Passif للعام N و N-1" class="button_secondary" invisible="passif_id != False"/>
+                                        <field name="passif_id" invisible="passif_id == False" readonly="1"/>
+                                    </group>
+                                </group>
                                 <group string="مؤشرات البنية المالية">
                                     <field name="bilan1_id">
                                         <tree editable="bottom" create="0" delete="0">

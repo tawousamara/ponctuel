@@ -642,15 +642,23 @@ class Etape(models.Model):
             'year_2': res.annee_fiscal - 2,
             'year_1': res.annee_fiscal - 3,
         })
+        vals = {'step_id': res.id,
+                        'sequence': 0,
+                        'declaration': 'السنة',
+                        'year_3': res.annee_fiscal - 1,
+                        'year_4': res.annee_fiscal,
+                        }
+        self.env['wk.bilan.cat1'].create(vals)
+        self.env['wk.bilan.cat2'].create(vals)
+        self.env['wk.bilan.cat3'].create(vals)
+        self.env['wk.bilan.cat4'].create(vals)
+        self.env['wk.bilan.cat5'].create(vals)
         count = 1
-        line = self.env['wk.bilan'].create({'declaration': 'السنة',
-                                            'step_id': res.id,
-                                            'sequence': 0})
-
-        for index, item in list_bil:
+        for index, item in list_bilan:
             line = self.env['wk.bilan'].create({'declaration': item,
+                                                'categorie': index,
                                                 'step_id': res.id,
-                                                'sequence': index})
+                                                'sequence': count})
             count += 1
         count = 1
         for item in list_recap:
@@ -662,6 +670,49 @@ class Etape(models.Model):
             count += 1
 
         return res
+    
+    tcr_id = fields.Many2one('import.ocr.tcr', string='TCR')
+    passif_id = fields.Many2one('import.ocr.passif', string='Passif')
+    actif_id = fields.Many2one('import.ocr.actif', string='Actif')
+
+    def action_create_tcr(self):
+        for rec in self:
+            view_id = self.env.ref('financial_modeling.import_ocr_tcr_view_form').id
+            return {
+                'name': 'TCR',
+                'domain': [('parent_id', '=', rec.id)],
+                'res_model': 'import.ocr.tcr',
+                'view_mode': 'form',
+                'view_id': view_id,
+                'type': 'ir.actions.act_window',
+                'context': {'parent_id': rec.id, 'year': 1}
+            }
+            
+    def action_create_actif(self):
+        for rec in self:
+            view_id = self.env.ref('financial_modeling.import_ocr_actif_view_form').id
+            return {
+                'name': 'Actif',
+                'domain': [('parent_id', '=', rec.id)],
+                'res_model': 'import.ocr.actif',
+                'view_mode': 'form',
+                'view_id': view_id,
+                'type': 'ir.actions.act_window',
+                'context': {'parent_id': rec.id, 'year': 1}
+            }
+    
+    def action_create_passif(self):
+        for rec in self:
+            view_id = self.env.ref('financial_modeling.import_ocr_passif_view_form').id
+            return {
+                'name': 'Passif',
+                'domain': [('parent_id', '=', rec.id)],
+                'res_model': 'import.ocr.passif',
+                'view_mode': 'form',
+                'view_id': view_id,
+                'type': 'ir.actions.act_window',
+                'context': {'parent_id': rec.id, 'year': 1}
+            }
 
 def view_viz(data1, data2):
     year = ["N-2", "N-1", "N"]
